@@ -23,13 +23,21 @@ See [COMBAT-CORRECTION.md](COMBAT-CORRECTION.md): combat requires and consumes b
 - Rat stats are still placeholders; no draft. Two test Rats assigned per seat, only the deployed opponent Rat is visible.
 - All seats manually controlled; controller labels do not imply implemented AI.
 - End Turn remains a configurable prototype control (PROTOTYPE.endTurnAllowed); confirm whether passing unused Actions is allowed in the final game.
-- All Cat behavior is Milestone 3. Cat collision locks at CAT_PENDING without rolling dice or spending Fervor. No partial Cat combat rules.
+- Cat behavior is implemented in Milestone 3. Its neutral Attack is automatically confirmed; players retain explicit Dodge confirmation and legal Fervor choices.
 - Five Rounds still stop at ARENA_END. Arena scoring, transition and complete Match lifecycle remain Milestone 4.
 - Sewers require an empty adjacent mandatory exit, with teleport/exit free. Whether exit may directly challenge an occupied hex remains unspecified.
 
 ## Later questions
 
-- Cat blocked terrain, occupied respawn, Rat-initiated Cat pushback and optional retreat choices.
+- Cat cases above are resolved by the owner-approved clarifications in RULEBOOK-v1.2.txt §54. Future custom Arenas must provide legal pushback space at the Cat spawn; a fully enclosed occupied spawn still needs a designer rule. The current test Arena has at least four open spawn neighbors for at most four Rats.
 - Arena rankings still tied after Health.
 - Final Duel starting Health, simultaneous elimination of all duelists, layout and Arena modifiers.
 - Actual Rat cards, board geometry and artwork can now be shared for content work; abilities and card effects belong to Milestone 5.
+
+## Milestone 3 approved clarifications
+
+The owner approved blocked Cat movement staying in place, occupied respawn triggering combat, and normal Rat-initiated Cat pushback/swap. They explicitly chose player-selected legal Cat pushback after a lost respawn combat; no deterministic nearest-hex rule is used. Active player controls neutral winner displacement when respawn has no movement direction.
+
+Attack dice already used the Rat card stat; identical placeholder cards concealed that behavior. Owner approved varied test Attack stats 2/3/4. Attack 4+ hits in Arena 1; there is no universal Rat Attack count. The full consolidated rulebook is now v1.2.
+
+Cat Health carry is implemented as carryCatToArena for the upcoming Arena transition. Completed Arenas do not start new respawn combat; a Cat respawning into an occupied end-of-Arena spawn remains staged until next Arena setup.

@@ -2,7 +2,7 @@ import { equal, key, neighbors, type HexCoordinate } from './hex';
 import type { GameState } from './types';
 export interface Step { to:HexCoordinate; cost:number; defenderId?:string }
 export function occupant(state:GameState,h:HexCoordinate): string|undefined {
-  if(state.cat.alive && equal(state.cat.position,h)) return 'cat';
+  if(state.cat.alive && !state.cat.offBoard && equal(state.cat.position,h)) return 'cat';
   return Object.values(state.players).find(p=>p.currentRat.alive && equal(p.currentRat.position,h))?.id;
 }
 export function empty(state:GameState,h:HexCoordinate):boolean {

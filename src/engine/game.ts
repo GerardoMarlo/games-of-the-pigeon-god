@@ -1,3 +1,4 @@
+import { moveCat } from './cat';
 import { beginTurn, endTurn, phase } from './turns';
 import { applyCombatAction, combatActions, startCombat } from './combat';
 import { prototypeBoard, prototypeRats } from '../content/prototype';
@@ -15,7 +16,7 @@ export function assertInvariants(state:GameState):void {
     if(rat.alive!==(rat.health>0)||p.eliminated===rat.alive)throw new Error('Invalid life state');
     if(rat.alive) {
       const tile=state.board.hexes[key(rat.position)];
-      if(!tile || ['rock','crate','sewer'].includes(tile.terrain) || occupied.has(key(rat.position)) || (state.cat.alive && equal(rat.position,state.cat.position))) throw new Error('Invalid occupancy');
+      if(!tile || ['rock','crate','sewer'].includes(tile.terrain) || occupied.has(key(rat.position)) || (state.cat.alive && !state.cat.offBoard && equal(rat.position,state.cat.position))) throw new Error('Invalid occupancy');
       occupied.add(key(rat.position));
     }
   }
@@ -33,6 +34,7 @@ export function createGame(config:GameConfig):GameState {
   phase(state,'ROUND_START');beginTurn(state);assertInvariants(state);return state;
 }
 export function getLegalActions(state:GameState,playerId:string):GameAction[] {
+  if(state.phase==='CAT_MOVEMENT')return playerId===state.activePlayerId?[{type:'ROLL_CAT_MOVEMENT',playerId}]:[];
   if(state.phase==='COMBAT')return combatActions(state,playerId);
   if(state.phase!=='PLAYER_ACTION' || state.activePlayerId!==playerId || !state.players[playerId]) return [];
   const actions:GameAction[]=movementPaths(state,playerId).map(path=>({type:'MOVE',playerId,path}));
@@ -42,6 +44,7 @@ export function getLegalActions(state:GameState,playerId:string):GameAction[] {
 export function dispatch(input:GameState,action:GameAction):GameState {
   action=structuredClone(action);
   const state=structuredClone(input);
+  if(state.phase==='CAT_MOVEMENT' && action.type==='ROLL_CAT_MOVEMENT' && action.playerId===state.activePlayerId){moveCat(state);assertInvariants(state);return state;}
   if(state.phase==='COMBAT'){applyCombatAction(state,action);assertInvariants(state);return state;}
   if(state.phase!=='PLAYER_ACTION' || action.playerId!==state.activePlayerId) throw new Error('Wrong phase or player');
   const player=state.players[action.playerId];

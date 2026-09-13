@@ -1,6 +1,9 @@
 import type { GameEvent } from './types';
 export function describeEvent(e:GameEvent):string {
   switch(e.type){
+    case 'CAT_MOVED':return `Cat movement die ${e.die}: ${e.blocked?'blocked; stays put':`toward (${e.to.q}, ${e.to.r})`}.`;
+    case 'CAT_RESPAWNED':return `Cat respawns with ${e.health} Health${e.occupied?'; spawn occupied: combat':''}.`;
+    case 'CAT_FINISHED':return `${e.sourceId} Finished the Cat.`;
     case 'PHASE_CHANGED':return e.phase.replaceAll('_',' ');
     case 'RAT_MOVED':return `${e.playerId} moved to (${e.to.q}, ${e.to.r}); ${e.cost} movement.`;
     case 'COMBAT_TRIGGERED':return `${e.attackerId} challenges ${e.defenderId}.`;

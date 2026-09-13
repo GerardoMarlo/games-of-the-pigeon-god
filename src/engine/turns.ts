@@ -4,9 +4,8 @@ export function phase(state:GameState,value:GamePhase):void {state.phase=value;s
 export function beginTurn(state:GameState):void {
   phase(state,'TURN_START');
   const player=state.players[state.activePlayerId];
-  player.actionsRemaining=player.eliminated?0:RULES.actionsPerTurn;
-  // §36 Cat movement belongs to Milestone 3; do not consume its RNG here.
-  phase(state,'PLAYER_ACTION');
+  player.actionsRemaining=0;
+  phase(state,'CAT_MOVEMENT');
 }
 export function endTurn(state:GameState):void {
   const player=state.players[state.activePlayerId];
@@ -18,4 +17,11 @@ export function endTurn(state:GameState):void {
     state.roundNumber++;phase(state,'ROUND_START');
   }
   state.activePlayerId=state.turnOrder[(index+1)%state.turnOrder.length];beginTurn(state);
+}
+
+// Cat resolution returns here without a second Cat roll.
+export function grantActions(state:GameState):void {
+  const p=state.players[state.activePlayerId];
+  if(p.eliminated){endTurn(state);return;}
+  p.actionsRemaining=RULES.actionsPerTurn;phase(state,'PLAYER_ACTION');
 }

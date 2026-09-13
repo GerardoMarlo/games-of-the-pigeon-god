@@ -8,7 +8,7 @@ export interface PlayerState { id:PlayerId; controller:'human'|'ai'; divineFavor
 export type HexTerrain = 'normal'|'rock'|'crate'|'sewer'|'spawn'|'center';
 export interface HexState { coordinate:HexCoordinate; terrain:HexTerrain; sewerId?:string }
 export interface BoardState { hexes:Record<string,HexState>; spawns:HexCoordinate[]; catSpawn:HexCoordinate }
-export interface CombatState { attackerId:string; defenderId:string; sourceHex:HexCoordinate; destinationHex:HexCoordinate; stage:'ATTACK'|'DODGE'|'PUSHBACK'|'CAT_PENDING'; attackerRoll:number[]; defenderRoll:number[]; attackerConfirmed:boolean; defenderConfirmed:boolean; attackerDamage:number; defenderDamage:number; winnerId?:string }
+export interface CombatState { attackerId:string; defenderId:string; sourceHex:HexCoordinate; destinationHex:HexCoordinate; stage:'ATTACK'|'DODGE'|'PUSHBACK'; attackerRoll:number[]; defenderRoll:number[]; attackerConfirmed:boolean; defenderConfirmed:boolean; attackerDamage:number; defenderDamage:number; winnerId?:string; origin?:'rat_move'|'cat_turn'|'cat_respawn'; resume?:'actions'|'end_turn'; direction?:HexCoordinate; catCreditPlayerId?:string }
 export type GameEvent = { type:'PHASE_CHANGED'; phase:GamePhase } | { type:'RAT_MOVED'; playerId:string; from:HexCoordinate; to:HexCoordinate; cost:number } | { type:'COMBAT_TRIGGERED'; attackerId:string; defenderId:string }
   | {type:'ROLL';playerId:string;kind:'ATTACK'|'DODGE';dice:number[]}
   | {type:'REROLL';playerId:string;kind:'ATTACK'|'DODGE';index:number;before:number;after:number}
@@ -20,7 +20,10 @@ export type GameEvent = { type:'PHASE_CHANGED'; phase:GamePhase } | { type:'RAT_
   | {type:'RAT_FINISHED';playerId:string;sourceId:string}
   | {type:'COMBAT_RESOLVED';attackerDamage:number;defenderDamage:number;winnerId:string}
   | {type:'DISPLACED';playerId:string;to:HexCoordinate;reason:'pushback'|'retreat'|'capture'}
+  | {type:'CAT_MOVED';die:number;from:HexCoordinate;to:HexCoordinate;blocked:boolean}
+  | {type:'CAT_RESPAWNED';health:number;occupied:boolean}
+  | {type:'CAT_FINISHED';sourceId:string}
   | {type:'ARENA_ENDED';winnerId?:string};
-export interface GameState { phase:GamePhase; arenaNumber:1|2; roundNumber:number; activePlayerId:PlayerId; turnOrder:PlayerId[]; players:Record<PlayerId,PlayerState>; board:BoardState; cat:{maxHealth:9;health:number;position:HexCoordinate;spawnPosition:HexCoordinate;alive:boolean}; rng:RNGState; eventLog:GameEvent[]; combat?:CombatState; arenaWinnerId?:string }
-export type GameAction = {type:'MOVE';playerId:PlayerId;path:HexCoordinate[]} | {type:'END_TURN'|'CONFIRM_ATTACK'|'CONFIRM_DODGE';playerId:PlayerId} | {type:'SPEND_FERVOR';playerId:PlayerId;dieIndex:number} | {type:'SELECT_PUSHBACK';playerId:PlayerId;destination:HexCoordinate};
+export interface GameState { phase:GamePhase; arenaNumber:1|2; roundNumber:number; activePlayerId:PlayerId; turnOrder:PlayerId[]; players:Record<PlayerId,PlayerState>; board:BoardState; cat:{maxHealth:9;health:number;position:HexCoordinate;spawnPosition:HexCoordinate;alive:boolean;offBoard?:boolean}; rng:RNGState; eventLog:GameEvent[]; combat?:CombatState; arenaWinnerId?:string }
+export type GameAction = {type:'MOVE';playerId:PlayerId;path:HexCoordinate[]} | {type:'ROLL_CAT_MOVEMENT'|'END_TURN'|'CONFIRM_ATTACK'|'CONFIRM_DODGE';playerId:PlayerId} | {type:'SPEND_FERVOR';playerId:PlayerId;dieIndex:number} | {type:'SELECT_PUSHBACK';playerId:PlayerId;destination:HexCoordinate};
 export interface GameConfig { seed:number; playerCount:2|3|4; board?:BoardState }

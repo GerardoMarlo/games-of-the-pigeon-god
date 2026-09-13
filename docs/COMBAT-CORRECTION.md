@@ -9,4 +9,4 @@ This correction supersedes conflicting rules in Technical Specification v1.0 (§
 - A winning attacker chooses an adjacent legal empty hex for the living defender, then captures the contested hex.
 - If there is no legal empty pushback hex, swap the living Rats: attacker captures the defender's hex; defender takes the attacker's immediately preceding hex. Do not retreat the winner.
 - Dead Rats need no displacement. Finish and simultaneous-death rules still apply.
-- Cat entry now also exhausts both Actions. Full Cat combat remains Milestone 3; its completion must use the same end-of-Turn rule for a Rat-initiated combat.
+- Cat entry now also exhausts both Actions. Milestone 3 implements Cat combat; Rat-initiated combat uses the same end-of-Turn rule. Cat-initiated start-of-Turn combat resolves before living-player Actions are granted. See RULEBOOK-v1.2.txt for approved Cat-specific displacement rules.

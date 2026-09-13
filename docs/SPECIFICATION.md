@@ -2,6 +2,10 @@
 
 Original title: Los Juegos del Dios Palomo. Source: owner's specification supplied September 12, 2026 in the project task. This durable reference transcribes the requirements in condensed form, retaining section numbers. The original supplied document takes precedence if wording differs. Prototype decisions do not amend these rules.
 
+## Current rulebook and Attack clarification
+
+Read [RULEBOOK-v1.2.txt](RULEBOOK-v1.2.txt), the consolidated rulebook with session corrections integrated into the actual rule sections. Each Rat rolls exactly its card attackDice: Attack 2 rolls two dice, Attack 4 rolls four. Arena 1 Attack results 4, 5 and 6 each cause one Hit. Prototype stats are not official Rat designs. Milestone 3 implements Cat Turn movement, shared combat, respawn, persistent Health and eliminated-player interaction; all dice remain seeded.
+
 ## Latest owner correction takes precedence
 
 Read [COMBAT-CORRECTION.md](COMBAT-CORRECTION.md) before implementing combat. Combat now costs both Actions and ends the Turn; no movement continuation. A losing attacker retreats one approach hex. Blocked defender pushback causes a position swap. Conflicting historical sections below are superseded.
@@ -24,13 +28,13 @@ The full owner-supplied [Rulebook v1.1](RULEBOOK-v1.1.txt) is preserved verbatim
 9. Explicit phases: SETUP, RAT_DRAFT, ARENA_SETUP, ROUND_START, TURN_START, CAT_MOVEMENT, PLAYER_ACTION, COMBAT, TURN_END, ROUND_END, ARENA_END, BETTING_RESOLUTION, BETWEEN_ARENAS, MATCH_END, FINAL_DUEL. Reject actions outside allowed phases.
 10. GameState: phase, arenaNumber (1|2), roundNumber, activePlayerId, turnOrder, players, board, cat, decrees, decreeDeck, itemDeck, RNG, optional winner/finalDuel, eventLog.
 11. Player: id, controller human|ai, optional difficulty, Divine Favor, drafted Rats, current Rat, eliminated, elimination Round, bet target, Attacks, Dodges, Finishes, Fervor, equipped Item, Actions remaining.
-12. Data-driven Rat card: id/name/maxHealth/attackDice/speed/optional ability/artwork. Runtime: ratId/ownerId/health/axial position/alive.
+12. Each Rat rolls its individual Attack stat as its Attack dice count (Attack 2 = two dice); Speed is its Dodge dice count. Data-driven Rat card: id/name/maxHealth/attackDice/speed/optional ability/artwork. Runtime: ratId/ownerId/health/axial position/alive.
 13. Two drafted Rats hidden until used. Human sees both own cards; AI sees only own unrevealed cards.
 14. Receive three Rats, keep one, pass two right, receive two from left, keep one, discard remainder. Select Arena 1 Rat; reserve other for Arena 2.
 15. Axial q,r; s=-q-r. Standard neighbors, distance, paths and directions.
 16. Terrain: normal, rock, crate, sewer, spawn, center. Hex coordinate, optional sewerId, Rat/Cat occupancy.
 17. One Move allows one through Speed hexes; may stop early.
-18. Rocks, large crates, Rats and Cat block traversal. Attempted Rat/Cat entry triggers combat and pauses movement.
+18. Rocks and large crates block traversal. Rat/Cat entry requires and consumes both Actions, triggers combat and ends the Turn after resolution.
 19. Occupied-hex entry automatically starts combat. No separate Attack Action.
 
 ## Combat and rewards (§§20–34)
@@ -44,8 +48,8 @@ The full owner-supplied [Rulebook v1.1](RULEBOOK-v1.1.txt) is preserved verbatim
 27. Spend one Fervor to reroll one Attack or Dodge die. May reroll same die repeatedly with sufficient Fervor.
 28. Explicit Attack and Dodge confirmation locks each roll; Attack cannot change after Dodge phase starts.
 29. Compare damage dealt in this combat. Attacker wins only if greater; defender wins every tie, including zero/zero.
-30. Losing defender is pushed to winner-chosen adjacent legal empty inside-Arena nonblocked hex without Rat/Cat. If none, winner retreats. Losing/tied attacker returns to entry source.
-31. Surviving moving Rat may continue using unused Speed after combat.
+30. Losing defender is pushed to a winner-chosen adjacent legal empty hex. If none, living participants swap positions. Losing/tied Rat attacker retreats exactly one approach hex.
+31. No movement continues after combat. End the attacking Rat's Turn automatically after displacement.
 32. Simultaneous damage can kill both; remove both and award both Finish credits. If last two die, Arena ends without winner.
 33. Exactly one living Rat at any moment ends Arena immediately with that winner.
 34. After Round 5 rank only living Rats by Finishes, Attacks, Dodges, then remaining Health. Winner gets two Divine Favor.
@@ -54,13 +58,13 @@ The full owner-supplied [Rulebook v1.1](RULEBOOK-v1.1.txt) is preserved verbatim
 35. Cat has maxHealth nine, current Health, position, spawnPosition, alive.
 36. Start of every player's Turn: one d6 picks one of six directions; Cat moves exactly one hex.
 37. Eliminated player still has a Turn: roll and resolve Cat movement/combat, then end Turn. No additional Cat move.
-38. Cat leaving Arena immediately respawns at spawn, default center.
+38. Cat leaving Arena respawns at spawn, default center, preserving surviving Health. Occupied respawn triggers Cat combat.
 39. Cat rolls three Attack dice, normal Arena 1 hit rule. Cannot Dodge. Defending Rat uses normal Dodge and may counterattack Cat.
 40. Rat voluntarily entering Cat hex attacks normally; Cat cannot Dodge; then Cat combat pushback rules.
-41. Winning moving Cat pushes Rat one hex along Cat direction. Illegal destination makes Cat retreat. Rat winning through counter damage may force Cat retreat.
+41. Winning moving Cat pushes Rat one hex along its direction; illegal destination makes Cat retreat. If Cat loses or ties, the winning Rat chooses legal Cat pushback. Respawn has no approach direction: active player chooses Rat pushback if Cat wins.
 42. Killing Cat grants responsible Rat one Finish. Cat respawns. Configurable explicit assumption: killed Cat respawns at full nine Health.
 43. Current Cat Health carries between Arenas, including post-respawn Health.
-44. Eliminated player's Cat movement causing a Rat Finish grants that eliminated player one Divine Favor.
+44. A player already eliminated at the time of the Cat movement roll gains one Divine Favor for a Rat Finished by that Cat movement/combat. Preserve this credit through respawn resolution.
 45. Players eliminated Rounds 1–3 may make one public bet on another player's Arena victory. Correct bet grants one Divine Favor. No bets for Round 4/5 eliminations.
 
 ## Sewers, Decrees and Items (§§46–54)
@@ -115,7 +119,7 @@ The full owner-supplied [Rulebook v1.1](RULEBOOK-v1.1.txt) is preserved verbatim
 ## Verification and delivery (§§85–101)
 85. Test priority engine, combat, movement, lifecycle, AI legality, UI integration.
 86. Required combat cases: 4/5/6 = three Arena 1 hits; three hits versus 2/5/6 = one incoming/one counter/two Dodges; one/one damage = defender wins/attacker retreats; simultaneous deaths and both Finish credits.
-87. Movement tests: rock/Rat/Cat blockers, stop early, occupied target combat, unused movement after combat, free Sewer teleport/mandatory exit/no end on Sewer, legal empty pushback.
+87. Movement tests: blockers, stop early, combat requires both Actions, no post-combat continuation, free Sewer exit, legal empty pushback, blocked-pushback swap, automatic Turn end.
 88. Cat tests: once per Turn including eliminated players, three dice, no Dodge, Rat counter, out-of-bounds respawn, killed Cat Finish/respawn, Health persistence.
 89. Arena tests: one survivor immediate win, zero survivors no winner, living-only ranking Finishes→Attacks→Dodges→Health.
 90. Decree tests: four active, immediate claim/replacement, first claimant only, comparative tie nobody, correct end-Arena timing.
@@ -130,3 +134,12 @@ The full owner-supplied [Rulebook v1.1](RULEBOOK-v1.1.txt) is preserved verbatim
 99. Order: rules → tests → AI → functional UI → animation → polish.
 100. First pass only React/TS/Vite, pure engine, hex math, models, Turn/Round machine, movement validation, seeded RNG and Vitest. Deterministic playable movement prototype. No Items, Decrees or advanced AI. Combat after reliable Milestone 1 and user continuation.
 101. Always use this specification. Identify rule section, implement engine, add/run tests, fix regressions. Never silently invent missing rules; isolate them in configurable constants or TODOs. Engine stays deterministic, testable and UI independent.
+
+## Milestone status
+
+- Milestones 1–2 complete, including owner combat corrections.
+- Milestone 3: Cat movement once per Turn, neutral three-dice attacks, shared combat, respawn, persistent Health helper, eliminated-player movement and Finish credit. Mixed seeded replay and Cat unit tests verify the implementation.
+- Milestone 4 next: complete Arena setup, scoring and transition, Arena 2 effects, Match completion and Final Duel. Cat Health carry helper is ready; the full two-Arena transition is still this next milestone.
+- Milestones 5–8 remain as originally planned.
+
+Prototype Rat Attack stats now vary across 2, 3 and 4. They are test content, not the owner's final Rat designs.
