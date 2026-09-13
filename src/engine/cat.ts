@@ -25,11 +25,12 @@ export function respawnCat(state:GameState,killed:boolean,resume:'actions'|'end_
   state.cat.offBoard=false;return false;
 }
 export function finishCatStep(state:GameState):void {
+  if(state.content?.catItemMovement){delete state.content.catItemMovement;delete state.content.catStep;delete state.content.catDie;if(state.players[state.activePlayerId].eliminated)endTurn(state);else state.phase='PLAYER_ACTION';return;}
   if(state.content){state.content.catStep='after';state.phase='CAT_MOVEMENT';return;}
   if(state.players[state.activePlayerId].eliminated)endTurn(state);else grantActions(state);
 }
 export function moveCat(state:GameState):void {
-  if(state.content&&!state.content.catStep){state.content.catDie=rollD6(state.rng);state.content.catRolled=true;state.content.catStep='rolled';state.eventLog.push({type:'CONTENT',message:`Cat direction rolled: ${state.content.catDie}.`});return;}
+  if(state.content&&!state.content.catStep&&!state.content.catItemMovement){state.content.catDie=rollD6(state.rng);state.content.catRolled=true;state.content.catStep='rolled';state.eventLog.push({type:'CONTENT',message:`Cat direction rolled: ${state.content.catDie}.`});return;}
   const die=state.content?.catDie??rollD6(state.rng),direction=directions[die-1],from={...state.cat.position};
   const to={q:from.q+direction.q,r:from.r+direction.r},tile=state.board.hexes[key(to)];
   const resume=state.players[state.activePlayerId].eliminated?'end_turn':'actions';

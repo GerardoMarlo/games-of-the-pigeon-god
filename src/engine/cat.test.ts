@@ -6,7 +6,7 @@ import { attackHits,combatActor,startCombat } from './combat';
 import { directions,key } from './hex';
 import { rollD6,seeded } from './rng';
 import type { GameState } from './types';
-function fixture():GameState {return createGame({content:false,board:legacyBoard(),seed:12345,playerCount:3});}
+function fixture():GameState {return createGame({automatic:false,content:false,board:legacyBoard(),seed:12345,playerCount:3});}
 function forceDirection(s:GameState,die:number):void {for(let seed=0;;seed++){const rng=seeded(seed);if(rollD6(rng)===die){s.rng=seeded(seed);return;}}}
 function catFight(s=fixture()):GameState {
   s.players.p2.currentRat.position={q:1,r:0};forceDirection(s,1);
@@ -29,7 +29,7 @@ describe('Cat Turn lifecycle',()=>{
   it('eliminated player moves Cat exactly once and ends Turn',()=>{const s=fixture();s.players.p1.currentRat.alive=false;s.players.p1.currentRat.health=0;s.players.p1.eliminated=true;forceDirection(s,1);const a=dispatch(s,{type:'ROLL_CAT_MOVEMENT',playerId:'p1'});expect(a.activePlayerId).toBe('p2');expect(a.phase).toBe('CAT_MOVEMENT');expect(a.eventLog.filter(e=>e.type==='CAT_MOVED')).toHaveLength(1);expect(a.players.p1.actionsRemaining).toBe(0);});
 });
 describe('shared Cat combat',()=>{
-  it('Cat rolls three Attack dice, locks attack and uses Rat Speed for Dodge',()=>{const s=catFight();expect(s.combat!.attackerRoll).toHaveLength(3);expect(s.combat!.attackerConfirmed).toBe(true);expect(s.combat!.defenderRoll).toHaveLength(s.players.p2.draftedRats[0].speed);expect(combatActor(s)).toBe('p2');expect(()=>dispatch(s,{type:'SPEND_FERVOR',playerId:'cat',dieIndex:0})).toThrow();});
+  it('Cat rolls four Attack dice, locks attack and uses Rat Speed for Dodge',()=>{const s=catFight();expect(s.combat!.attackerRoll).toHaveLength(4);expect(s.combat!.attackerConfirmed).toBe(true);expect(s.combat!.defenderRoll).toHaveLength(s.players.p2.draftedRats[0].speed);expect(combatActor(s)).toBe('p2');expect(()=>dispatch(s,{type:'SPEND_FERVOR',playerId:'cat',dieIndex:0})).toThrow();});
   it('winning Cat pushes forward and living roller then receives two Actions',()=>{const s=resolveCat([4,4,4],[1,1,1]);expect(s.cat.position).toEqual({q:1,r:0});expect(s.players.p2.currentRat.position).toEqual({q:2,r:0});expect(s.phase).toBe('PLAYER_ACTION');expect(s.players.p1.actionsRemaining).toBe(2);});
   it('blocked forward push makes Cat retreat instead of swapping',()=>{const f=fixture();f.board.hexes['2,0'].terrain='rock';const s=resolveCat([4,4,4],[1,1,1],f);expect(s.cat.position).toEqual({q:0,r:0});expect(s.players.p2.currentRat.position).toEqual({q:1,r:0});});
   it('counterattacks damage Cat and winning Rat chooses its pushback',()=>{let s=resolveCat([1,1,1],[6,1,1]);expect(s.cat.health).toBe(8);expect(s.players.p2.attacks).toBe(1);expect(s.combat!.stage).toBe('PUSHBACK');const action=getLegalActions(s,'p2')[0];expect(action.type).toBe('SELECT_PUSHBACK');s=dispatch(s,action);expect(s.phase).toBe('PLAYER_ACTION');expect(s.players.p1.actionsRemaining).toBe(2);assertInvariants(s);});
@@ -49,7 +49,7 @@ describe('respawn and persistence',()=>{
 describe('integrated seeded legality',()=>{
   it('replays 100 sequences of Cat and Rat actions without missing decisions',()=>{
     for(let seed=0;seed<100;seed++){
-      let s=createGame({content:false,board:legacyBoard(),seed,playerCount:4});
+      let s=createGame({automatic:false,content:false,board:legacyBoard(),seed,playerCount:4});
       for(let step=0;step<60&&s.phase!=='ARENA_END';step++){
         const actions=getLegalActions(s,combatActor(s));expect(actions.length).toBeGreaterThan(0);
         const action=actions[seed%actions.length];const before=structuredClone(s);

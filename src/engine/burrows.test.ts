@@ -6,7 +6,7 @@ import { empty,traceMovement } from './movement';
 import type { GameState } from './types';
 
 function placed(count:2|3|4=2,seed=7):GameState {
-  let s=createGame({content:false,seed,playerCount:count});
+  let s=createGame({automatic:false,content:false,seed,playerCount:count});
   while(s.phase==='ARENA_SETUP')s=dispatch(s,getLegalActions(s,s.activePlayerId)[0]);
   return s;
 }
@@ -14,7 +14,7 @@ function ready(s:GameState):void {s.phase='PLAYER_ACTION';s.players[s.activePlay
 
 describe('owner-selected Burrows and board size',()=>{
   it.each([2,3,4] as const)('%i players place in Turn order on the correct board',count=>{
-    let s=createGame({content:false,seed:7,playerCount:count});
+    let s=createGame({automatic:false,content:false,seed:7,playerCount:count});
     expect(Object.keys(s.board.hexes)).toHaveLength(count===2?19:37);
     const order=[...s.turnOrder];
     for(const id of order){
@@ -33,7 +33,7 @@ describe('owner-selected Burrows and board size',()=>{
     expect(new Set(s.board.burrows!.map(b=>key(b.position))).size).toBe(count);
   });
   it('rejects wrong seat, nonperimeter and duplicate placement without mutating state',()=>{
-    let s=createGame({content:false,seed:3,playerCount:4});const original=structuredClone(s);
+    let s=createGame({automatic:false,content:false,seed:3,playerCount:4});const original=structuredClone(s);
     expect(()=>dispatch(s,{type:'PLACE_BURROW',playerId:s.activePlayerId,destination:{q:0,r:0}})).toThrow();
     expect(s).toEqual(original);
     const a=getLegalActions(s,s.activePlayerId)[0];s=dispatch(s,a);
@@ -41,7 +41,7 @@ describe('owner-selected Burrows and board size',()=>{
     if(a.type==='PLACE_BURROW')expect(()=>dispatch(s,{...a,playerId:s.activePlayerId})).toThrow();
   });
   it('allows one blocked entrance but rejects all entrances blocked',()=>{
-    const s=createGame({content:false,seed:4,playerCount:2}),position={q:-3,r:1};
+    const s=createGame({automatic:false,content:false,seed:4,playerCount:2}),position={q:-3,r:1};
     const entrances=neighbors(position).filter(h=>s.board.hexes[key(h)]);
     expect(entrances).toHaveLength(2);
     for(const h of entrances)s.board.hexes[key(h)].terrain='normal';

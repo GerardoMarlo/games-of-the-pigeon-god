@@ -16,7 +16,7 @@ export function describeEvent(e:GameEvent):string {
     case 'ROLL':return `${e.playerId} rolled ${e.kind.toLowerCase()}: ${e.dice.join(', ')}.`;
     case 'REROLL':return `${e.playerId} rerolled die ${e.index+1}: ${e.before} → ${e.after}.`;
     case 'ROLL_CONFIRMED':return `${e.playerId} confirmed ${e.kind.toLowerCase()}.`;
-    case 'DAMAGE':return `${e.sourceId} dealt ${e.amount} damage to ${e.targetId}.`;
+    case 'DAMAGE':return `${e.sourceId} dealt ${e.amount} damage to ${e.targetId}. Remaining Health: ${e.healthRemaining??'?'}.`;
     case 'FERVOR_CHANGED':return `${e.playerId}: ${e.amount>0?'+':''}${e.amount} Fervor (${e.reason}).`;
     case 'TRACKER_CHANGED':return `${e.playerId}: +${e.amount} ${e.tracker}.`;
     case 'FAVOR_CHANGED':return `${e.playerId}: +${e.amount} Divine Favor.`;

@@ -1,0 +1,20 @@
+import { describe,it,expect } from 'vitest';
+import { createGame,dispatch,getLegalActions,settle } from './game';
+import { legacyBoard } from '../tests/fixtures';
+import { describeEvent } from './log';
+import type { GameState } from './types';
+function fixture():GameState {
+ const s=createGame({automatic:false,seed:7,playerCount:3,board:legacyBoard()});s.automatic=true;s.phase='PLAYER_ACTION';s.activePlayerId='p1';s.turnOrder=['p1','p2','p3'];
+ for(const p of Object.values(s.players)){p.currentRat.health=6;p.draftedRats[0].maxHealth=6;p.draftedRats[0].speed=3;delete p.draftedRats[0].ability;}
+ s.players.p1.currentRat.position={q:-2,r:0};s.players.p2.currentRat.position={q:-2,r:-1};s.players.p1.actionsRemaining=2;s.content!.decrees=[];s.content!.decreeDeck=[];return s;
+}
+function give(s:GameState,id:string,item:string){s.content!.itemDeck=s.content!.itemDeck.filter(i=>i!==item);s.content!.players[id].items=[item];}
+describe('automatic decision gates',()=>{
+ it('skips before Attack without a matching Item, retains it with Needle',()=>{const s=fixture();s.players.p1.fervor=1;let r=dispatch(s,{type:'MOVE',playerId:'p1',path:[{q:-2,r:-1}]});expect(r.combat!.stage).toBe('ATTACK');give(s,'p1','aguja');r=dispatch(s,{type:'MOVE',playerId:'p1',path:[{q:-2,r:-1}]});expect(r.combat!.stage).toBe('BEFORE_ATTACK');r=dispatch(r,{type:'USE_ITEM',playerId:'p1',itemId:'aguja'});expect(r.combat!.stage).toBe('ATTACK');});
+ it('only Feather causes the before-Dodge pause',()=>{const s=fixture();s.players.p1.fervor=1;s.players.p2.fervor=1;give(s,'p2','pluma');let r=dispatch(s,{type:'MOVE',playerId:'p1',path:[{q:-2,r:-1}]});r=dispatch(r,{type:'CONFIRM_ATTACK',playerId:'p1'});expect(r.combat!.stage).toBe('BEFORE_DODGE');r=dispatch(r,{type:'USE_ITEM',playerId:'p2',itemId:'pluma'});expect(r.combat!.stage).toBe('DODGE');});
+ it('finishes an exhausted Item-free Turn immediately; equipped Item retains End Turn for timer',()=>{let s=fixture();s.players.p1.actionsRemaining=1;let r=dispatch(s,{type:'MOVE',playerId:'p1',path:[{q:-3,r:0}]});expect(r.activePlayerId).not.toBe('p1');s=fixture();s.players.p1.actionsRemaining=1;give(s,'p1','aguja');r=dispatch(s,{type:'MOVE',playerId:'p1',path:[{q:-3,r:0}]});expect(r.activePlayerId).toBe('p1');expect(r.players.p1.actionsRemaining).toBe(0);expect(getLegalActions(r,'p1').some(a=>a.type==='END_TURN')).toBe(true);});
+ it('a losing combat resolves retreat without a displacement confirmation',()=>{const s=fixture();s.players.p1.fervor=1;s.players.p2.fervor=1;let r=dispatch(s,{type:'MOVE',playerId:'p1',path:[{q:-2,r:-1}]});r.combat!.attackerRoll=[1,2];r=dispatch(r,{type:'CONFIRM_ATTACK',playerId:'p1'});r.combat!.defenderRoll=[1,2];r=dispatch(r,{type:'CONFIRM_DODGE',playerId:'p2'});expect(r.players.p1.currentRat.position).toEqual({q:-2,r:0});expect(r.combat?.stage).not.toBe('AFTER_DAMAGE');expect(r.activePlayerId).not.toBe('p1');});
+ it('Sardine moves Cat during the Turn without granting extra Actions or another Cat roll',()=>{const s=fixture();give(s,'p1','sardina');const r=dispatch(s,{type:'USE_ITEM',playerId:'p1',itemId:'sardina',direction:1});expect(r.cat.position).toEqual({q:1,r:0});expect(r.players.p1.actionsRemaining).toBe(2);expect(r.phase).toBe('PLAYER_ACTION');});
+ it('damage event text includes remaining Health',()=>{expect(describeEvent({type:'DAMAGE',sourceId:'cat',targetId:'p1',amount:2,healthRemaining:1})).toContain('Remaining Health: 1');});
+ it('a held Bell keeps only its conditional reaction window',()=>{const s=fixture();s.phase='CAT_MOVEMENT';give(s,'p1','cascabel');const r=settle(s);expect(r.content!.catStep).toBe('rolled');expect(r.eventLog.filter(e=>e.type==='CAT_MOVED')).toHaveLength(0);const next=dispatch(r,{type:'CONFIRM_CAT_DIRECTION',playerId:'p1'});expect(next.content!.catStep).toBeUndefined();});
+});

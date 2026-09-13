@@ -4,7 +4,7 @@ import type { RNGState } from './rng';
 export type GamePhase = 'CONTENT_EFFECT'|'SETUP'|'RAT_DRAFT'|'ARENA_SETUP'|'ROUND_START'|'TURN_START'|'CAT_MOVEMENT'|'PLAYER_ACTION'|'COMBAT'|'TURN_END'|'ROUND_END'|'ARENA_END'|'BETTING_RESOLUTION'|'BETWEEN_ARENAS'|'MATCH_END'|'FINAL_DUEL';
 export type PlayerId = string;
 export interface RatCard { id:string; name:string; maxHealth:number; attackDice:number; speed:number; artwork:string; ability?:string; description?:string }
-export interface RatState { ratId:string; ownerId:PlayerId; health:number; position:HexCoordinate; alive:boolean; inBurrow?:boolean }
+export interface RatState { ratId:string; ownerId:PlayerId; health:number; position:HexCoordinate; alive:boolean; inBurrow?:boolean; forcedBurrow?:boolean }
 export interface PlayerState { id:PlayerId; controller:'human'|'ai'; divineFavor:number; draftedRats:RatCard[]; currentRat:RatState; eliminated:boolean; eliminationRound?:number; betTargetPlayerId?:PlayerId; attacks:number; dodges:number; finishes:number; fervor:number; actionsRemaining:number }
 export type HexTerrain = 'normal'|'rock'|'crate'|'sewer'|'spawn'|'center';
 export interface HexState { coordinate:HexCoordinate; terrain:HexTerrain; sewerId?:string }
@@ -14,7 +14,7 @@ export type GameEvent = {type:'CONTENT';message:string} | {type:'BURROW_PLACED';
   | {type:'ROLL';playerId:string;kind:'ATTACK'|'DODGE';dice:number[]}
   | {type:'REROLL';playerId:string;kind:'ATTACK'|'DODGE';index:number;before:number;after:number}
   | {type:'ROLL_CONFIRMED';playerId:string;kind:'ATTACK'|'DODGE'}
-  | {type:'DAMAGE';sourceId:string;targetId:string;amount:number}
+  | {type:'DAMAGE';sourceId:string;targetId:string;amount:number;healthRemaining?:number}
   | {type:'FERVOR_CHANGED';playerId:string;amount:number;reason:string}
   | {type:'TRACKER_CHANGED';playerId:string;tracker:'attacks'|'dodges'|'finishes';amount:number}
   | {type:'FAVOR_CHANGED';playerId:string;amount:number}
@@ -29,8 +29,8 @@ export type GameEvent = {type:'CONTENT';message:string} | {type:'BURROW_PLACED';
   | {type:'MATCH_ENDED';winnerId:string}
   | {type:'DUEL_STARTED';attempt:number}
   | {type:'ARENA_ENDED';winnerId?:string};
-export interface GameState { content?:ContentState; phase:GamePhase; arenaNumber:1|2; roundNumber:number; activePlayerId:PlayerId; turnOrder:PlayerId[]; players:Record<PlayerId,PlayerState>; board:BoardState; cat:{maxHealth:9;health:number;position:HexCoordinate;spawnPosition:HexCoordinate;alive:boolean;offBoard?:boolean}; rng:RNGState; eventLog:GameEvent[]; combat?:CombatState; arenaWinnerId?:string; seatOrder:PlayerId[]; arenaResults:ArenaResult[]; arenaTemplate?:BoardState; burrowPlacement?:{order:PlayerId[];placed:PlayerId[]}; winnerId?:PlayerId; finalDuel?:{participants:PlayerId[];choices:Record<PlayerId,string>;stage:'selection'|'combat';attempt:number} }
+export interface GameState { automatic?:boolean;mode?:'local'|'ai'; content?:ContentState; phase:GamePhase; arenaNumber:1|2; roundNumber:number; activePlayerId:PlayerId; turnOrder:PlayerId[]; players:Record<PlayerId,PlayerState>; board:BoardState; cat:{maxHealth:9;health:number;position:HexCoordinate;spawnPosition:HexCoordinate;alive:boolean;offBoard?:boolean}; rng:RNGState; eventLog:GameEvent[]; combat?:CombatState; arenaWinnerId?:string; seatOrder:PlayerId[]; arenaResults:ArenaResult[]; arenaTemplate?:BoardState; burrowPlacement?:{order:PlayerId[];placed:PlayerId[]}; winnerId?:PlayerId; finalDuel?:{participants:PlayerId[];choices:Record<PlayerId,string>;stage:'selection'|'combat';attempt:number} }
 export interface ArenaResult {arenaNumber:1|2;winnerId?:PlayerId;reason:'round_limit'|'last_survivor'|'no_survivors'|'unbroken_tie';ranking:PlayerId[];favor:Record<PlayerId,number>}
 export type GameAction = ContentAction | {type:'PLACE_BURROW';playerId:PlayerId;destination:HexCoordinate} | {type:'MOVE';playerId:PlayerId;path:HexCoordinate[]} | {type:'CONTINUE_ARENA'|'START_ARENA_2'|'ROLL_CAT_MOVEMENT'|'END_TURN'|'CONFIRM_ATTACK'|'CONFIRM_DODGE';playerId:PlayerId} | {type:'SPEND_FERVOR';playerId:PlayerId;dieIndex:number} | {type:'SELECT_PUSHBACK';playerId:PlayerId;destination:HexCoordinate} | LifecycleAction;
 export type LifecycleAction = {type:'SELECT_DUEL_RAT';playerId:PlayerId;ratId:string} | {type:'SELECT_BET';playerId:PlayerId;targetId:PlayerId};
-export interface GameConfig { seed:number; playerCount:2|3|4; board?:BoardState; content?:boolean }
+export interface GameConfig { seed:number; playerCount:2|3|4; board?:BoardState; content?:boolean; automatic?:boolean; mode?:'local'|'ai' }

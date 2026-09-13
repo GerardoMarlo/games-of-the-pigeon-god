@@ -20,8 +20,8 @@ export function Board({state,actions,send}:Props){
       </g>;
     })}
     {state.board.burrows?.slice(0,seats.length).map((b,i)=>{
-      const {q,r}=b.position,p=state.players[b.playerId??seats[i]],present=p.currentRat.alive&&p.currentRat.inBurrow;
-      return <g key={key(b.position)} data-burrow transform={`translate(${48*(q+r/2)},${42*r})`} aria-label={`${p.id} Burrow${present?' occupied':' empty'}`}><polygon points={points} className="burrow"/><text textAnchor="middle" dy="-3">{p.id.toUpperCase()}</text><text textAnchor="middle" dy="9">{present?'IN BURROW':'BURROW'}</text></g>;
+      const {q,r}=b.position,p=state.players[b.playerId??seats[i]],occupant=Object.values(state.players).find(p=>p.currentRat.alive&&p.currentRat.inBurrow&&key(p.currentRat.position)===key(b.position)),present=!!occupant;
+      return <g key={key(b.position)} data-burrow transform={`translate(${48*(q+r/2)},${42*r})`} aria-label={`${p.id} Burrow${present?' occupied':' empty'}`}><polygon points={points} className="burrow"/><text textAnchor="middle" dy="-3">{p.id.toUpperCase()}</text><text textAnchor="middle" dy="9">{present?`${occupant!.id.toUpperCase()} IN BURROW`:'BURROW'}</text></g>;
     })}
   </svg><p>{count} Arena hexes; Burrows {count===19?'sit outside the perimeter':'occupy outer-ring hexes'}. Exit on your first Turn. You cannot voluntarily end a Turn in your Burrow. An entrance occupied by a Rat or the Cat starts combat; a failed attack returns you to retry next Turn.</p><p>Combat costs two Actions. Card-granted Actions or movement may continue after displacement.</p></section>;
 }

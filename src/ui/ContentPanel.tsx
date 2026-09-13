@@ -2,7 +2,7 @@ import { itemCards } from '../content/cards';
 import { decreeCards,decreeDescription } from '../content/decrees';
 import type { GameAction,GameState } from '../engine/types';
 interface Props {state:GameState;actions:GameAction[];send:(action:GameAction)=>void}
-const labels:Record<string,string>={EFFECT_REQUEST_ITEM:'Request Item with bonus Action',REQUEST_ITEM:'Request Item (1 Action)',ROLL_ATTACK:'Roll Attack',ACCEPT_ATTACK:'Accept Attack / prepare Dodge',ROLL_DODGE:'Roll Dodge',RESOLVE_COMBAT:'Resolve displacement',CONFIRM_CAT_DIRECTION:'Confirm Cat direction',FINISH_CAT_MOVEMENT:'Finish Cat movement',SKIP_EFFECT:'Skip remaining bonus movement'};
+const labels:Record<string,string>={EFFECT_REQUEST_ITEM:'Request Item with bonus Action',REQUEST_ITEM:'Request Item (1 Action)',ROLL_ATTACK:'Roll Attack',ACCEPT_ATTACK:'Accept Attack / prepare Dodge',ROLL_DODGE:'Roll Dodge',RESOLVE_COMBAT:'Resolve displacement',CONFIRM_CAT_DIRECTION:'Keep rolled direction',FINISH_CAT_MOVEMENT:'Continue',SKIP_EFFECT:'Skip remaining bonus movement'};
 export function ContentPanel({state,actions,send}:Props){
  if(!state.content)return null;
  return <section aria-label="Cards and effects">

@@ -32,10 +32,10 @@ export function itemActions(state:GameState,id:string):GameAction[] {
    case 'arena':if(defend&&c?.stage==='ATTACK_RESPONSE')c.attackerRoll.forEach((d,dieIndex)=>{if(d>=4)add({dieIndex});});break;
    case 'tapa':case 'escudo':if(defend&&c&&['ATTACK_RESPONSE','BEFORE_DODGE','DODGE'].includes(c.stage)&&(c.attackerRoll.some(d=>d>=4)||ability(state,c.attackerId)==='twins_three'&&new Set(c.attackerRoll).size<c.attackerRoll.length))add();break;
    case 'clavo':if(attack&&c?.stage==='AFTER_DAMAGE'&&c.attackerDamage>0&&(c.defenderId==='cat'?state.cat.alive:state.players[c.defenderId].currentRat.alive))add();break;
-   case 'sardina':if(active&&state.phase==='CAT_MOVEMENT'&&!data.catStep)for(let direction=1;direction<=6;direction++)add({direction});break;
+   case 'sardina':if(active&&(state.automatic?turn:state.phase==='CAT_MOVEMENT'&&!data.catStep))for(let direction=1;direction<=6;direction++)add({direction});break;
    case 'cascabel':if(active&&state.phase==='CAT_MOVEMENT'&&data.catStep==='rolled'&&data.catRolled)add();break;
-   case 'silbato':if(active&&state.phase==='CAT_MOVEMENT'&&!data.catStep)for(const destination of catDestinations(state))add({destination});break;
-   case 'migajas':if(active&&state.phase==='CAT_MOVEMENT'&&data.catStep==='after')for(const [i,d] of directions.entries()){const h={q:state.cat.position.q+d.q,r:state.cat.position.r+d.r},tile=state.board.hexes[key(h)];if(tile&&!['rock','crate'].includes(tile.terrain)&&!isBurrow(state,h))add({destination:h,direction:i+1});}break;
+   case 'silbato':if(active&&(state.automatic?turn:state.phase==='CAT_MOVEMENT'&&!data.catStep))for(const destination of catDestinations(state))add({destination});break;
+   case 'migajas':if(active&&(state.automatic?turn:state.phase==='CAT_MOVEMENT'&&data.catStep==='after'))for(const [i,d] of directions.entries()){const h={q:state.cat.position.q+d.q,r:state.cat.position.r+d.r},tile=state.board.hexes[key(h)];if(tile&&!['rock','crate'].includes(tile.terrain)&&!isBurrow(state,h))add({destination:h,direction:i+1});}break;
   }
  }
  return result;
@@ -56,7 +56,7 @@ export function applyItem(state:GameState,action:GameAction):void {
   case 'chile':p.fervor++;break;
   case 'brasa':owned.brasa=true;break;
   case 'patines':owned.speedBonus=2;break;
-  case 'hueso':owned.afterMovement=false;data.effects.push({playerId:p.id,entityId:p.id,steps:1,reason:'Hueso pulido'});if(!c){data.resume='player_action';resumeEffects(state);}break;
+  case 'hueso':owned.afterMovement=false;data.effects.push({playerId:p.id,entityId:p.id,steps:1,reason:'Polished Bone'});if(!c){data.resume='player_action';resumeEffects(state);}break;
   case 'aguja':ctx!.attackDice++;break;
   case 'red':ctx!.dodgeDice--;break;
   case 'pluma':ctx!.dodgeDice++;break;
@@ -65,10 +65,10 @@ export function applyItem(state:GameState,action:GameAction):void {
   case 'moneda':if(data.catStep==='rolled'&&state.phase==='CAT_MOVEMENT')data.catDie=rollD6(state.rng);else (c!.attackerId===p.id?c!.attackerRoll:c!.defenderRoll)[action.dieIndex!]=rollD6(state.rng);break;
   case 'tapa':ctx!.cancelHits++;break;
   case 'escudo':ctx!.cancelAttack=true;break;
-  case 'clavo':data.effects.unshift({playerId:p.id,entityId:c!.defenderId,steps:1,reason:'Clavo torcido'});break;
-  case 'sardina':data.catDie=action.direction;data.catStep='rolled';data.catRolled=false;break;
+  case 'clavo':data.effects.unshift({playerId:p.id,entityId:c!.defenderId,steps:1,reason:'Bent Nail'});break;
+  case 'sardina':data.catDie=action.direction;data.catStep='rolled';data.catRolled=false;if(state.automatic){data.catItemMovement=true;moveCat(state);}break;
   case 'cascabel':data.catDie=rollD6(state.rng);break;
-  case 'migajas':data.catDie=action.direction;moveCat(state);break;
+  case 'migajas':data.catDie=action.direction;if(state.automatic)data.catItemMovement=true;moveCat(state);break;
   case 'silbato':state.cat.position={...action.destination!};note(state,`Cat moves to (${action.destination!.q}, ${action.destination!.r}).`);break;
  }
  if(action.itemId==='sardina')note(state,`Cat direction chosen: ${directions[action.direction!-1].q}, ${directions[action.direction!-1].r}.`);

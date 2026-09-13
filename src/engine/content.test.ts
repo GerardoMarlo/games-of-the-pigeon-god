@@ -9,7 +9,7 @@ import { occupant } from './movement';
 import { distance,key } from './hex';
 import type { GameAction,GameState } from './types';
 function fixture():GameState {
- const s=createGame({seed:7,playerCount:3,board:legacyBoard()});s.activePlayerId='p1';s.turnOrder=['p1','p2','p3'];s.phase='PLAYER_ACTION';
+ const s=createGame({automatic:false,seed:7,playerCount:3,board:legacyBoard()});s.activePlayerId='p1';s.turnOrder=['p1','p2','p3'];s.phase='PLAYER_ACTION';
  for(const p of Object.values(s.players)){p.currentRat.health=6;p.currentRat.inBurrow=false;p.draftedRats[0].maxHealth=6;p.draftedRats[0].attackDice=3;p.draftedRats[0].speed=3;delete p.draftedRats[0].ability;}
  s.players.p1.actionsRemaining=2;s.players.p1.currentRat.position={q:-2,r:0};s.players.p2.currentRat.position={q:-2,r:-1};
  s.content!.decrees=[];s.content!.decreeDeck=[];return s;
@@ -23,8 +23,8 @@ function finish(s:GameState):GameState {s=act(s,'RESOLVE_COMBAT');if(s.combat?.s
 function use(s:GameState,id:string,itemId:string,dieIndex?:number):GameState {return dispatch(s,{type:'USE_ITEM',playerId:id,itemId,dieIndex});}
 
 describe('supplied content and state',()=>{
- it('excludes both Oro Rats and only the Cat-Dodge Decree',()=>{expect(ratCards).toHaveLength(18);expect(itemCards).toHaveLength(17);expect(decreeCards).toHaveLength(19);expect(ratCards.some(c=>/oro/i.test(c.description))).toBe(false);expect(decreeCards.some(c=>c.id==='doma')).toBe(true);});
- it('deals unique real Rats and four public Decrees deterministically',()=>{const a=createGame({seed:9,playerCount:4});expect(createGame({seed:9,playerCount:4})).toEqual(a);expect(new Set(Object.values(a.players).flatMap(p=>p.draftedRats.map(r=>r.id))).size).toBe(8);expect(a.content!.decrees).toHaveLength(4);expect(a.content!.itemDeck).toHaveLength(17);expect(JSON.stringify(getVisibleState(a,'p1'))).not.toContain('itemDeck');});
+ it('excludes both Oro Rats and only the Cat-Dodge Decree',()=>{expect(ratCards).toHaveLength(14);expect(itemCards).toHaveLength(17);expect(decreeCards).toHaveLength(19);expect(ratCards.some(c=>/oro/i.test(c.description))).toBe(false);expect(decreeCards.some(c=>c.id==='doma')).toBe(true);});
+ it('deals unique real Rats and four public Decrees deterministically',()=>{const a=createGame({automatic:false,seed:9,playerCount:4});expect(createGame({automatic:false,seed:9,playerCount:4})).toEqual(a);expect(new Set(Object.values(a.players).flatMap(p=>p.draftedRats.map(r=>r.id))).size).toBe(8);expect(a.content!.decrees).toHaveLength(4);expect(a.content!.itemDeck).toHaveLength(17);expect(JSON.stringify(getVisibleState(a,'p1'))).not.toContain('itemDeck');});
  it('draw costs one Action, is mandatory keep, and capacity is one or two for Ingeniero',()=>{let s=fixture();s=act(s,'REQUEST_ITEM');expect(s.players.p1.actionsRemaining).toBe(1);expect(s.content!.players.p1.items).toHaveLength(1);expect(()=>act(s,'REQUEST_ITEM','p1')).toThrow();setAbility(s,'p1','two_items');s=act(s,'REQUEST_ITEM','p1');expect(s.content!.players.p1.items).toHaveLength(2);expect(s.players.p1.actionsRemaining).toBe(0);});
  it('rejects Item use at an illegal timing and after consumption',()=>{let s=fixture();item(s,'p1','aguja');expect(()=>use(s,'p1','aguja')).toThrow();s=attack(s);s=use(s,'p1','aguja');expect(()=>use(s,'p1','aguja')).toThrow();s=act(s,'ROLL_ATTACK');expect(s.combat!.attackerRoll).toHaveLength(4);});
  it('Chile supplies ordinary persistent Fervor, including on another player decision',()=>{let s=attack();item(s,'p2','chile');s=use(s,'p2','chile');expect(s.players.p2.fervor).toBe(1);expect(s.content!.itemDiscard).toContain('chile');});
@@ -79,7 +79,7 @@ describe('card interactions and deterministic integration',()=>{
  });
  it.each([2,3,4] as const)('completes seeded %i-player Matches with real cards and legal actions',playerCount=>{
   for(let seed=1;seed<=10;seed++){
-   let s=createGame({seed,playerCount});
+   let s=createGame({automatic:false,seed,playerCount});
    for(let step=0;step<1600&&s.phase!=='MATCH_END';step++){
     const legal=s.seatOrder.flatMap(id=>getLegalActions(s,id));expect(legal.length,`deadlock seed ${seed} ${s.phase} ${JSON.stringify({active:s.activePlayerId,player:s.players[s.activePlayerId],content:s.content?.players[s.activePlayerId],effects:s.content?.effects,cat:s.cat,log:s.eventLog.slice(-8)})}`).toBeGreaterThan(0);
     let action=legal.find(a=>!['MOVE','END_TURN','SPEND_FERVOR','USE_ITEM','USE_ABILITY','REQUEST_ITEM','SELECT_BET','EFFECT_MOVE','EFFECT_ACTION_MOVE','EFFECT_REQUEST_ITEM'].includes(a.type));
@@ -105,7 +105,7 @@ describe('remaining content boundaries',()=>{
  it('Red never creates a negative Dodge count',()=>{const f=fixture();f.players.p2.draftedRats[0].speed=0;let s=attack(f);item(s,'p1','red');s=use(s,'p1','red');s=act(s,'ROLL_ATTACK');s=act(s,'CONFIRM_ATTACK');s=act(s,'ACCEPT_ATTACK');s=act(s,'ROLL_DODGE');expect(s.combat!.defenderRoll).toEqual([]);});
  it('Rat content is reset between Arenas while deck order and Favor persist',()=>{let s=fixture();item(s,'p1','brasa');s=use(s,'p1','brasa');s.content!.players.p1.catDamage=3;s.content!.players.p1.moved=true;s.players.p1.divineFavor=4;const deck=[...s.content!.itemDeck];finishArena(s);s=act(s,'CONTINUE_ARENA');s=act(s,'START_ARENA_2');expect(s.content!.players.p1.catDamage).toBe(0);expect(s.content!.players.p1.brasa).toBe(false);expect(s.content!.itemDeck).toEqual(deck);expect(s.players.p1.divineFavor).toBe(4);});
  it('Arena-end strict comparison and Round-five center/Health conditions',()=>{const s=fixture();s.roundNumber=5;s.players.p1.currentRat.position={q:0,r:0};s.cat.position={q:1,r:0};s.players.p1.currentRat.health=1;s.players.p2.currentRat.health=1;s.players.p3.currentRat.health=1;s.content!.decrees=['centro','dueno','maltrecho'];finishArena(s);expect(s.content!.claims.map(c=>c.cardId)).toContain('centro');expect(s.content!.claims.map(c=>c.cardId)).not.toContain('dueno');expect(s.content!.claims.filter(c=>c.cardId==='maltrecho')).toHaveLength(1);});
- it('Cat counter-Finish claims Doma and Venganza and generic Finish objectives',()=>{
+ it('Cat counter-Finish claims Doma and Vengeance and generic Finish objectives',()=>{
   let s=fixture();s.phase='CAT_MOVEMENT';s.players.p1.actionsRemaining=0;s.cat.position={q:-3,r:0};s.cat.health=1;s.content!.catStep='rolled';s.content!.catDie=1;s.content!.decrees=['doma','venganza','remata-uno'];
   s=act(s,'CONFIRM_CAT_DIRECTION');s=act(s,'ROLL_ATTACK');s.combat!.attackerRoll=[1,2,3];s=act(s,'ACCEPT_ATTACK');s=act(s,'ROLL_DODGE');s.combat!.defenderRoll=[6];s=act(s,'CONFIRM_DODGE');expect(s.content!.claims.map(c=>c.cardId)).toEqual(['doma','venganza','remata-uno']);expect(s.players.p1.divineFavor).toBe(8);
  });
@@ -118,7 +118,7 @@ it('bonus voluntary movement uses free Sewer teleportation and mandatory exit',(
 });
 it('mixed legal Item/ability decisions preserve invariants across seeded sequences',()=>{
  for(let seed=21;seed<=25;seed++){
-  let s=createGame({seed,playerCount:4});
+  let s=createGame({automatic:false,seed,playerCount:4});
   for(let step=0;step<400&&s.phase!=='MATCH_END';step++){
    const legal=s.seatOrder.flatMap(id=>getLegalActions(s,id));expect(legal.length,`mixed ${seed} ${s.phase}`).toBeGreaterThan(0);
    const items=legal.filter(a=>a.type==='USE_ITEM'||a.type==='USE_ABILITY'||a.type==='REQUEST_ITEM');
@@ -130,10 +130,10 @@ it('mixed legal Item/ability decisions preserve invariants across seeded sequenc
 
 it('Clavo extra displacement precedes Sigiloso post-combat movement',()=>{
  const f=fixture();setAbility(f,'p1','attack_move');let s=rolls(attack(f),[4,4,4],[1]);item(s,'p1','clavo');s=use(s,'p1','clavo');s=finish(s);
- expect(s.content!.effects[0].reason).toBe('Clavo torcido');expect(getLegalActions(s,'p1').some(a=>a.type==='SKIP_EFFECT')).toBe(false);
- s=act(s,'EFFECT_MOVE');expect(s.content!.effects[0].reason).toBe('Ratón Sigiloso');
+ expect(s.content!.effects[0].reason).toBe('Bent Nail');expect(getLegalActions(s,'p1').some(a=>a.type==='SKIP_EFFECT')).toBe(false);
+ s=act(s,'EFFECT_MOVE');expect(s.content!.effects[0].reason).toBe('Stealthy Rat');
 });
 
 it('Hueso can extend a combat-triggering Move after normal displacement',()=>{
- let s=rolls(attack(),[4,4,4],[1]);item(s,'p1','hueso');s=use(s,'p1','hueso');expect(s.phase).toBe('COMBAT');s=finish(s);expect(s.phase).toBe('CONTENT_EFFECT');expect(s.content!.effects[0].reason).toBe('Hueso pulido');s=act(s,'EFFECT_MOVE');expect(s.activePlayerId).toBe('p2');assertInvariants(s);
+ let s=rolls(attack(),[4,4,4],[1]);item(s,'p1','hueso');s=use(s,'p1','hueso');expect(s.phase).toBe('COMBAT');s=finish(s);expect(s.phase).toBe('CONTENT_EFFECT');expect(s.content!.effects[0].reason).toBe('Polished Bone');s=act(s,'EFFECT_MOVE');expect(s.activePlayerId).toBe('p2');assertInvariants(s);
 });

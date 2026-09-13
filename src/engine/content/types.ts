@@ -18,6 +18,6 @@ export interface ContentState {
  itemDeck:string[];itemDiscard:string[];decreeDeck:string[];decrees:string[];decreeDiscard:string[];
  claims:{cardId:string;playerId:string;arenaNumber:1|2}[];
  players:Record<string,CardPlayerState>;
- combat?:CardCombatState;catStep?:'rolled'|'after';catDie?:number;catRolled?:boolean;
+ combat?:CardCombatState;catStep?:'rolled'|'after';catDie?:number;catRolled?:boolean;catItemMovement?:boolean;
  effects:PendingEffect[];resume?:'actions'|'end_turn'|'player_action';combatRetreat?:boolean;
 }

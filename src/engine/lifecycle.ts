@@ -52,7 +52,7 @@ export function checkEliminationEnd(state:GameState):boolean {
 function deploy(state:GameState,p:PlayerState,ratId:string,index:number):void {
   const card=p.draftedRats.find(r=>r.id===ratId);
   if(!card)throw new Error('Rat is not owned by this player');
-  p.currentRat={ratId,ownerId:p.id,health:card.maxHealth,alive:true,position:{...(state.board.spawns[index]??state.board.catSpawn)},inBurrow:!state.arenaTemplate||!state.board.hexes[key(state.board.spawns[index])]};
+  p.currentRat={ratId,ownerId:p.id,health:card.maxHealth,alive:true,position:{...(state.board.spawns[index]??state.board.catSpawn)},inBurrow:!!state.board.burrows?.some(b=>b.position.q===state.board.spawns[index]?.q&&b.position.r===state.board.spawns[index]?.r)||!state.board.hexes[key(state.board.spawns[index]??state.board.catSpawn)]};
   p.attacks=0;p.dodges=0;p.finishes=0;p.fervor=0;p.actionsRemaining=0;p.eliminated=false;
   delete p.eliminationRound;delete p.betTargetPlayerId;
 }
@@ -65,14 +65,15 @@ export function arenaTwoOrder(state:GameState):string[] {
 function startArenaTwo(state:GameState):void {
   resetContentArena(state);
   state.turnOrder=arenaTwoOrder(state);state.activePlayerId=state.turnOrder[0];
-  state.board=state.arenaTemplate?structuredClone(state.arenaTemplate):generateArena(state.rng,state.seatOrder.length);
+  // Arena 2 reuses every terrain and Burrow coordinate from Arena 1.
+  state.board=structuredClone(state.board);
   for(const [i,id] of state.seatOrder.entries()){
     const p=state.players[id],reserved=p.draftedRats.find(r=>r.id!==p.currentRat.ratId)!;
     deploy(state,p,reserved.id,i);
   }
   state.arenaNumber=2;state.roundNumber=1;delete state.arenaWinnerId;delete state.combat;
   carryCatToArena(state);state.cat.alive=true;
-  state.eventLog.push({type:'ARENA_STARTED',arenaNumber:2});if(state.arenaTemplate){phase(state,'ROUND_START');beginTurn(state);}else beginPlacement(state);
+  state.eventLog.push({type:'ARENA_STARTED',arenaNumber:2});phase(state,'ROUND_START');beginTurn(state);
 }
 function startDuel(state:GameState):void {
   resetContentArena(state);

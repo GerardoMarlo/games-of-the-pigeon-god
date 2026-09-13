@@ -1,6 +1,6 @@
 # Owner combat correction — September 13, 2026
 
-Milestone 5 addendum: these are the base combat rules. Owner-approved card-granted Actions and movement override normal Turn completion; see [Rulebook v1.5 section 56](RULEBOOK-v1.5.txt).
+Milestone 5 addendum: these are the base combat rules. Owner-approved card-granted Actions and movement override normal Turn completion; see [Rulebook v1.6 section 56](RULEBOOK-v1.6.txt).
 
 This correction supersedes conflicting rules in Technical Specification v1.0 (§§18–19,30–31,82) and Rulebook v1.1 (§§9–10,18–19). The original rulebook remains preserved verbatim for history.
 
@@ -12,3 +12,5 @@ This correction supersedes conflicting rules in Technical Specification v1.0 (§
 - If there is no legal empty pushback hex, swap the living Rats: attacker captures the defender's hex; defender takes the attacker's immediately preceding hex. Do not retreat the winner.
 - Dead Rats need no displacement. Finish and simultaneous-death rules still apply.
 - Cat entry now also exhausts both Actions. Milestone 3 implements Cat combat; Rat-initiated combat uses the same end-of-Turn rule. Cat-initiated start-of-Turn combat resolves before living-player Actions are granted. See RULEBOOK-v1.2.txt for approved Cat-specific displacement rules.
+
+Milestone 6: an equipped Item permits a four-second human Item window at zero Actions; no Item ends the Turn immediately. Automatic settlement skips displacement without a choice. See current rulebook section 57.

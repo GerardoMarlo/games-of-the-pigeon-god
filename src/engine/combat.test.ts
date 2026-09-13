@@ -6,7 +6,7 @@ import { neighbors, key } from './hex';
 import type { GameState } from './types';
 
 function fixture(count:2|3|4=3):GameState {
-  const s=createGame({content:false,board:legacyBoard(),seed:12345,playerCount:count});
+  const s=createGame({automatic:false,content:false,board:legacyBoard(),seed:12345,playerCount:count});
   s.phase='PLAYER_ACTION';s.activePlayerId='p1';s.players.p1.actionsRemaining=2;for(const p of Object.values(s.players))p.draftedRats[0].attackDice=3;
   s.players.p1.currentRat.position={q:-2,r:0};s.players.p2.currentRat.position={q:-2,r:-1};
   return s;

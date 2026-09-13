@@ -11,13 +11,13 @@ export function effectActions(state:GameState,id:string):GameAction[] {
   const preview=actionPreview(state,id);
   return [{type:'SKIP_EFFECT',playerId:id},...movementPaths(preview,id).map(path=>({type:'EFFECT_ACTION_MOVE' as const,playerId:id,path})),...(itemActions(preview,id).some(a=>a.type==='REQUEST_ITEM')?[{type:'EFFECT_REQUEST_ITEM' as const,playerId:id}]:[])];
  }
- if(e.entityId!=='cat'&&e.reason!=='Clavo torcido'){
+ if(e.entityId!=='cat'&&e.reason!=='Bent Nail'){
   const preview=actionPreview(state,id),p=preview.players[id];p.draftedRats.find(r=>r.id===p.currentRat.ratId)!.speed=e.steps;preview.content!.players[id].speedBonus=0;
   return [{type:'SKIP_EFFECT',playerId:id},...movementPaths(preview,id).map(path=>({type:'EFFECT_MOVE' as const,playerId:id,destination:path[path.length-1],path}))];
  }
  const position=e.entityId==='cat'?state.cat.position:state.players[e.entityId].currentRat.position;
  const moves=neighbors(position).filter(h=>empty(state,h)).map(destination=>({type:'EFFECT_MOVE' as const,playerId:id,destination}));
- return e.reason==='Clavo torcido'&&moves.length?moves:[{type:'SKIP_EFFECT',playerId:id},...moves];
+ return e.reason==='Bent Nail'&&moves.length?moves:[{type:'SKIP_EFFECT',playerId:id},...moves];
 }
 export function resumeEffects(state:GameState):void {
  const c=state.content!;
@@ -27,7 +27,7 @@ export function resumeEffects(state:GameState):void {
  if(resume==='actions')finishCatStep(state);
  else if(resume==='end_turn'){
   const p=state.players[state.activePlayerId];
-  if(p.currentRat.alive&&p.actionsRemaining>0&&!(retreat&&p.currentRat.inBurrow&&!movementPaths(actionPreview(state,p.id),p.id).length))phase(state,'PLAYER_ACTION');else endTurn(state,retreat);
+  if(p.currentRat.alive&&(p.actionsRemaining>0||state.automatic&&c.players[p.id].items.length>0&&!p.currentRat.inBurrow)&&!(retreat&&p.currentRat.inBurrow&&!movementPaths(actionPreview(state,p.id),p.id).length))phase(state,'PLAYER_ACTION');else endTurn(state,retreat);
  }else phase(state,'PLAYER_ACTION');
 }
 function actionPreview(state:GameState,id:string):GameState {const p=structuredClone(state);p.phase='PLAYER_ACTION';p.activePlayerId=id;p.players[id].actionsRemaining=1;return p;}
@@ -46,7 +46,7 @@ export function applyEffect(state:GameState,action:GameAction):void {
   let cost=1;
   if(action.path){const preview=actionPreview(state,e.entityId),p=preview.players[e.entityId];p.draftedRats.find(r=>r.id===p.currentRat.ratId)!.speed=e.steps;preview.content!.players[e.entityId].speedBonus=0;cost=traceMovement(preview,e.entityId,action.path).reduce((n,step)=>n+step.cost,0);}
   if(e.entityId==='cat')state.cat.position={...action.destination};
-  else {const p=state.players[e.entityId];p.currentRat.position={...action.destination};p.currentRat.inBurrow=false;if(e.reason!=='Clavo torcido')c.players[p.id].moved=true;}
+  else {const p=state.players[e.entityId];p.currentRat.position={...action.destination};p.currentRat.inBurrow=false;if(e.reason!=='Bent Nail')c.players[p.id].moved=true;}
   note(state,`${e.entityId} moves to (${action.destination.q}, ${action.destination.r}) via ${e.reason}.`);e.steps-=cost;
  }
  resumeEffects(state);

@@ -73,7 +73,7 @@ function tracker(state:GameState,p:PlayerState,kind:'attacks'|'dodges'|'finishes
   if(!state.finalDuel&&kind==='finishes' && before<RULES.finishFavorMilestone && p.finishes>=RULES.finishFavorMilestone){p.divineFavor++;state.eventLog.push({type:'FAVOR_CHANGED',playerId:p.id,amount:1});}
 }
 function displace(state:GameState,playerId:string,to:HexCoordinate,reason:'pushback'|'retreat'|'capture'):void {
-  if(playerId==='cat'){state.cat.position={...to};state.cat.offBoard=false;}else {state.players[playerId].currentRat.position={...to};state.players[playerId].currentRat.inBurrow=isBurrow(state,to);}state.eventLog.push({type:'DISPLACED',playerId,to:{...to},reason});
+  if(playerId==='cat'){state.cat.position={...to};state.cat.offBoard=false;}else {state.players[playerId].currentRat.position={...to};state.players[playerId].currentRat.inBurrow=isBurrow(state,to);if(isBurrow(state,to)&&reason==='pushback')state.players[playerId].currentRat.forcedBurrow=true;}state.eventLog.push({type:'DISPLACED',playerId,to:{...to},reason});
 }
 function complete(state:GameState,c:CombatState):void {
   delete state.combat;
@@ -93,7 +93,7 @@ function alive(state:GameState,id:string):boolean {return id==='cat'?state.cat.a
 function damage(state:GameState,sourceId:string,targetId:string,amount:number):void {
   if(targetId==='cat')state.cat.health=Math.max(0,state.cat.health-amount);
   else state.players[targetId].currentRat.health=Math.max(0,state.players[targetId].currentRat.health-amount);
-  state.eventLog.push({type:'DAMAGE',sourceId,targetId,amount});
+  state.eventLog.push({type:'DAMAGE',sourceId,targetId,amount,healthRemaining:health(state,targetId)});
 }
 function finish(state:GameState,victimId:string,killerId:string):void {
   if(health(state,victimId)>0)return;

@@ -4,7 +4,7 @@ Original title: Los Juegos del Dios Palomo. Source: owner's specification suppli
 
 ## Current rulebook and Attack clarification
 
-Read [RULEBOOK-v1.5.txt](RULEBOOK-v1.5.txt), the consolidated rulebook with session corrections integrated into the actual rule sections. Each Rat rolls exactly its card attackDice: Attack 2 rolls two dice, Attack 4 rolls four. Arena 1 Attack results 4, 5 and 6 each cause one Hit. Prototype stats are not official Rat designs. Milestone 3 implements Cat Turn movement, shared combat, respawn, persistent Health and eliminated-player interaction; all dice remain seeded.
+Read [RULEBOOK-v1.6.txt](RULEBOOK-v1.6.txt), the consolidated rulebook with session corrections integrated into the actual rule sections. Each Rat rolls exactly its card attackDice: Attack 2 rolls two dice, Attack 4 rolls four. Arena 1 Attack results 4, 5 and 6 each cause one Hit. Prototype stats are not official Rat designs. Milestone 3 implements Cat Turn movement, shared combat, respawn, persistent Health and eliminated-player interaction; all dice remain seeded.
 
 ## Latest owner correction takes precedence
 
@@ -59,7 +59,7 @@ The full owner-supplied [Rulebook v1.1](RULEBOOK-v1.1.txt) is preserved verbatim
 36. Start of every player's Turn: one d6 picks one of six directions; Cat moves exactly one hex.
 37. Eliminated player still has a Turn: roll and resolve Cat movement/combat, then end Turn. No additional Cat move.
 38. Cat leaving Arena respawns at spawn, default center, preserving surviving Health. Occupied respawn triggers Cat combat.
-39. Cat rolls three Attack dice, normal Arena 1 hit rule. Cannot Dodge. Defending Rat uses normal Dodge and may counterattack Cat.
+39. Cat rolls four Attack dice, normal Arena 1 hit rule. Cannot Dodge. Defending Rat uses normal Dodge and may counterattack Cat.
 40. Rat voluntarily entering Cat hex attacks normally; Cat cannot Dodge; then Cat combat pushback rules.
 41. Winning moving Cat pushes Rat one hex along its direction; illegal destination makes Cat retreat. If Cat loses or ties, the winning Rat chooses legal Cat pushback. Respawn has no approach direction: active player chooses Rat pushback if Cat wins.
 42. Killing Cat grants responsible Rat one Finish. Cat respawns. Configurable explicit assumption: killed Cat respawns at full nine Health.
@@ -114,13 +114,13 @@ The full owner-supplied [Rulebook v1.1](RULEBOOK-v1.1.txt) is preserved verbatim
 81. Actions include Move/RequestItem/UseItem/SpendFervor/ConfirmAttack/ConfirmDodge/SelectPushback/SelectBet/SelectRat.
 82. MOVE {playerId,path}. Validate player, phase, alive, Actions, adjacency, Speed, terrain, occupancy, Sewers.
 83. Explicit combat context: attacker/defender/source/destination/rolls/confirmations/damage/movement remaining.
-84. Central rule config: two Arenas, five Rounds, two Actions; Cat nine Health/three dice; four Decrees; Arena winner two Favor; early bet last Round three; Attack/Dodge milestones four/five; Finish Fervor at two/Favor at three.
+84. Central rule config: two Arenas, five Rounds, two Actions; Cat nine Health/four dice; four Decrees; Arena winner two Favor; early bet last Round three; Attack/Dodge milestones four/five; Finish Fervor at two/Favor at three.
 
 ## Verification and delivery (§§85–101)
 85. Test priority engine, combat, movement, lifecycle, AI legality, UI integration.
 86. Required combat cases: 4/5/6 = three Arena 1 hits; three hits versus 2/5/6 = one incoming/one counter/two Dodges; one/one damage = defender wins/attacker retreats; simultaneous deaths and both Finish credits.
 87. Movement tests: blockers, stop early, combat requires both Actions, no post-combat continuation, free Sewer exit, legal empty pushback, blocked-pushback swap, automatic Turn end.
-88. Cat tests: once per Turn including eliminated players, three dice, no Dodge, Rat counter, out-of-bounds respawn, killed Cat Finish/respawn, Health persistence.
+88. Cat tests: once per Turn including eliminated players, four dice, no Dodge, Rat counter, out-of-bounds respawn, killed Cat Finish/respawn, Health persistence.
 89. Arena tests: one survivor immediate win, zero survivors no winner, living-only ranking Finishes→Attacks→Dodges→Health.
 90. Decree tests: four active, immediate claim/replacement, first claimant only, comparative tie nobody, correct end-Arena timing.
 91. Arena 2 tests: center start Fervor, six causes two hits for Rat and Cat.
@@ -138,10 +138,10 @@ The full owner-supplied [Rulebook v1.1](RULEBOOK-v1.1.txt) is preserved verbatim
 ## Milestone status
 
 - Milestones 1–2 complete, including owner combat corrections.
-- Milestone 3: Cat movement once per Turn, neutral three-dice attacks, shared combat, respawn, persistent Health helper, eliminated-player movement and Finish credit. Mixed seeded replay and Cat unit tests verify the implementation.
+- Milestone 3: Cat movement once per Turn, neutral four-dice attacks, shared combat, respawn, persistent Health helper, eliminated-player movement and Finish credit. Mixed seeded replay and Cat unit tests verify the implementation.
 - Milestone 4 complete: 19/37-hex seeded Arenas with ordered Burrow placement and mandatory exit, five-Round/early scoring, public bets, Arena 2 transition and modifiers, Match completion and Final Duel.
 - Milestone 5: supplied Rat stats/abilities, Items with explicit timing windows, public Decrees and replacement/scoring are implemented. Oro cards and Cat-Dodge Decrees are excluded.
-- Milestones 6–8 remain as originally planned.
+- Milestone 6 complete: balanced legal-action AI, shallow simulation, reroll decisions and live local/AI mode. Milestones 7–8 remain planned.
 
 The prototype now deals two distinct supplied Rats per seat from the 18-card active pool; the physical draft remains a separate pending feature. Printed Attack, Health and Speed replace test stats.
 
@@ -149,4 +149,10 @@ Milestone 5 content reference: see reference/DECREES.md and the supplied grid. E
 
 ## Milestone 5 owner rulings
 
-Rulebook v1.5 section 56 governs the card implementation. Card-granted Actions/movement override normal combat Turn end. Remove every Oro card. Pacifista means zero damage dealt. Cat Finishes meet generic Finish objectives. Turno 5 means Round 5. Matching Attack pairs include misses; Místico deals three incoming Hits that remain Dodgeable and counterable. Die modifiers cap at six. Chile grants persistent normal Fervor. Esquivo requires at least one successful Dodge die. Clavo adds an extra push. A Rat blocking a Burrow entrance can be challenged using the same return-and-retry rule as the Cat.
+Rulebook v1.6 section 56 governs the card implementation. Card-granted Actions/movement override normal combat Turn end. Remove every Oro card. Pacifista means zero damage dealt. Cat Finishes meet generic Finish objectives. Turno 5 means Round 5. Matching Attack pairs include misses; Místico deals three incoming Hits that remain Dodgeable and counterable. Die modifiers cap at six. Chile grants persistent normal Fervor. Esquivo requires at least one successful Dodge die. Clavo adds an extra push. A Rat blocking a Burrow entrance can be challenged using the same return-and-retry rule as the Cat.
+
+## Milestone 6 owner changes
+
+Milestone 6 implements balanced heuristic AI with shallow public-state simulations and a live local/AI toggle. No Hard opponent-response layer is claimed yet. Automatic settlement skips noninteractive roll, Cat and displacement steps; applicable Item/ability/Fervor decisions still pause. Human exhausted Turns end immediately without Items, or after a cancellable four-second Item window. Wall-clock timing lives in the controller/UI, not the deterministic reducer.
+
+Cat Attack is now four dice. Arena 2 reuses Arena 1's complete terrain, Cat spawn and Burrows. Active cards are translated into English. Retire Swift, Warrior, Murmillo and Thracian Rat for rework, retaining 14 active Rats. Keep the two Oro/Gold cards excluded. Damage logs include remaining Health. Rulebook v1.6 sections 56–57 supersede the earlier wording.

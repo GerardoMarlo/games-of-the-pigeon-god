@@ -35,11 +35,11 @@ export function combatRewards(state:GameState):void {
   if(c.defenderId==='cat'){data.players[atk.id].catDamage+=c.attackerDamage;if(!state.cat.alive)data.players[atk.id].catFinishes++;}
   if(ability(state,atk.id)==='twins_action'&&new Set(c.attackerRoll).size<c.attackerRoll.length)bonusAction(state,atk.id,true);
   if(ability(state,atk.id)==='finish_action'&&(c.defenderId==='cat'?!state.cat.alive:!def.currentRat.alive))bonusAction(state,atk.id,true);
-  if(ability(state,atk.id)==='attack_move')data.effects.push({playerId:atk.id,entityId:atk.id,steps:1,reason:'Ratón Sigiloso'});
+  if(ability(state,atk.id)==='attack_move')data.effects.push({playerId:atk.id,entityId:atk.id,steps:1,reason:'Stealthy Rat'});
  }
  if(def){
   if(c.attackerId==='cat'){data.players[def.id].catDamage+=c.defenderDamage;if(!state.cat.alive)data.players[def.id].catFinishes++;}
   if(c.attackerId==='cat'?!state.cat.alive:!atk.currentRat.alive){data.players[def.id].counterFinishes++;if(ability(state,def.id)==='finish_action')bonusAction(state,def.id,true);}
-  if(ability(state,def.id)==='dodge_move'&&c.defenderRoll.some(d=>d>=5))data.effects.push({playerId:def.id,entityId:def.id,steps:2,reason:'Ratón Esquivo'});
+  if(ability(state,def.id)==='dodge_move'&&c.defenderRoll.some(d=>d>=5))data.effects.push({playerId:def.id,entityId:def.id,steps:2,reason:'Elusive Rat'});
  }
 }
