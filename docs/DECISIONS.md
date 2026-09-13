@@ -2,13 +2,17 @@
 
 The owner's technical specification v1.0 governs architecture and milestones. The complete supplied Rulebook v1.1 is preserved verbatim in RULEBOOK-v1.1.txt and adds the following rule context.
 
+## Owner correction overrides earlier interpretations
+
+See [COMBAT-CORRECTION.md](COMBAT-CORRECTION.md): combat requires and consumes both Actions, automatically ends the Turn after displacement, and never allows movement continuation. Losing attacker retreats one hex along the approach path. No legal defender pushback means the Rats swap positions.
+
 ## Resolved in Milestone 2
 
 - Rulebook §§4/14: Dodge dice equal Speed. Attack dice equal Attack. Implemented in the engine.
 - Rulebook §24: lost Health can become Fervor. The digital implementation automatically flips each lost Health token, granting one Fervor per actual Health lost. Isolated as RULES.fervorPerHealthLost; this resolves the optional physical token language without requiring a redundant UI click.
 - Technical §§24/29 and rulebook §§13/17/22: damage successfully dealt is interpreted as actual Health removed, capped at remaining Health. That value determines Attack credit and combat comparison. Overkill gives no extra damage credit or Health-loss Fervor. Isolated as RULES.capDamageToHealth for designer revision.
 - Defender wins every damage tie. An attacker killed by counters cannot capture a hex. A dead defender needs no pushback; a living attacker captures the vacated hex.
-- Pushback is to an adjacent empty non-Sewer hex. The attacker stays at source during unresolved combat, so its source is occupied until capture and is not a legal pushback destination. If all other neighbors are blocked/occupied, attacker retreats.
+- Pushback is to an adjacent empty non-Sewer hex. The attacker stays at source during unresolved combat, so its source is occupied until capture and is not a legal pushback destination. If all other neighbors are blocked/occupied, the living Rats swap positions (latest owner correction).
 - Finish damage is simultaneous. Both eliminated Rats receive applicable Finish credits; active player's simultaneous Finish rewards are recorded first (rulebook §53). Elimination Round is recorded for later betting.
 - Early Arena termination at zero/one survivors is implemented because combat must stop immediately; no Arena victory Favor, scoring, bets or transition yet.
 - Health-loss and tracker rewards resolve on final confirmed dice, never provisional dice. A confirmed Attack cannot be rerolled during Dodge. Dice may be rerolled repeatedly before confirmation.

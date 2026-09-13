@@ -1,3 +1,4 @@
+import { endTurn } from './turns';
 import { equal, neighbors, type HexCoordinate } from './hex';
 import { empty } from './movement';
 import { rollD6 } from './rng';
@@ -20,10 +21,10 @@ function roll(state:GameState,playerId:string,kind:'ATTACK'|'DODGE'):number[] {
   const dice=Array.from({length:kind==='ATTACK'?card.attackDice:card.speed},()=>rollD6(state.rng));
   state.eventLog.push({type:'ROLL',playerId,kind,dice:[...dice]});return dice;
 }
-export function startCombat(state:GameState,defenderId:string,sourceHex:HexCoordinate,destinationHex:HexCoordinate,remaining:number):void {
+export function startCombat(state:GameState,defenderId:string,sourceHex:HexCoordinate,destinationHex:HexCoordinate):void {
   const attackerId=state.activePlayerId;
-  state.combat={attackerId,defenderId,sourceHex,destinationHex,movementRemaining:remaining,stage:defenderId==='cat'?'CAT_PENDING':'ATTACK',attackerRoll:[],defenderRoll:[],attackerConfirmed:false,defenderConfirmed:false,attackerDamage:0,defenderDamage:0};
-  delete state.movement;
+  state.combat={attackerId,defenderId,sourceHex,destinationHex,stage:defenderId==='cat'?'CAT_PENDING':'ATTACK',attackerRoll:[],defenderRoll:[],attackerConfirmed:false,defenderConfirmed:false,attackerDamage:0,defenderDamage:0};
+  state.players[attackerId].actionsRemaining=0;
   state.phase='COMBAT';state.eventLog.push({type:'COMBAT_TRIGGERED',attackerId,defenderId},{type:'PHASE_CHANGED',phase:'COMBAT'});
   if(defenderId!=='cat')state.combat.attackerRoll=roll(state,attackerId,'ATTACK');
 }
@@ -54,12 +55,11 @@ function tracker(state:GameState,p:PlayerState,kind:'attacks'|'dodges'|'finishes
 function displace(state:GameState,playerId:string,to:HexCoordinate,reason:'pushback'|'retreat'|'capture'):void {
   state.players[playerId].currentRat.position={...to};state.eventLog.push({type:'DISPLACED',playerId,to:{...to},reason});
 }
-function complete(state:GameState,c:CombatState):void {
+function complete(state:GameState):void {
   delete state.combat;
   const living=Object.values(state.players).filter(p=>p.currentRat.alive);
-  if(living.length<=1){state.phase='ARENA_END';state.arenaWinnerId=living[0]?.id;delete state.movement;state.eventLog.push({type:'ARENA_ENDED',winnerId:living[0]?.id},{type:'PHASE_CHANGED',phase:'ARENA_END'});return;}
-  if(state.players[c.attackerId].currentRat.alive && c.movementRemaining>0)state.movement={playerId:c.attackerId,remaining:c.movementRemaining};
-  state.phase='PLAYER_ACTION';state.eventLog.push({type:'PHASE_CHANGED',phase:'PLAYER_ACTION'});
+  if(living.length<=1){state.phase='ARENA_END';state.arenaWinnerId=living[0]?.id;state.eventLog.push({type:'ARENA_ENDED',winnerId:living[0]?.id},{type:'PHASE_CHANGED',phase:'ARENA_END'});return;}
+  endTurn(state);
 }
 function resolve(state:GameState,c:CombatState):void {
   const attacker=state.players[c.attackerId],defender=state.players[c.defenderId];
@@ -80,10 +80,13 @@ function resolve(state:GameState,c:CombatState):void {
   state.eventLog.push({type:'COMBAT_RESOLVED',attackerDamage:c.attackerDamage,defenderDamage:c.defenderDamage,winnerId:c.winnerId});
   if(attacker.currentRat.alive && !defender.currentRat.alive)displace(state,attacker.id,c.destinationHex,'capture');
   else if(attacker.currentRat.alive && defender.currentRat.alive){
-    if(c.winnerId===attacker.id){c.stage='PUSHBACK';if(pushbackHexes(state).length)return;}
-    displace(state,attacker.id,c.sourceHex,'retreat');
+    if(c.winnerId===attacker.id){
+      c.stage='PUSHBACK';if(pushbackHexes(state).length)return;
+      displace(state,defender.id,c.sourceHex,'pushback');
+      displace(state,attacker.id,c.destinationHex,'capture');
+    }else displace(state,attacker.id,c.sourceHex,'retreat');
   }
-  complete(state,c);
+  complete(state);
 }
 export function applyCombatAction(state:GameState,action:GameAction):void {
   const c=state.combat;
@@ -98,6 +101,6 @@ export function applyCombatAction(state:GameState,action:GameAction):void {
   }else if(action.type==='CONFIRM_DODGE'){
     c.defenderConfirmed=true;state.eventLog.push({type:'ROLL_CONFIRMED',playerId:action.playerId,kind:'DODGE'});resolve(state,c);
   }else if(action.type==='SELECT_PUSHBACK'){
-    displace(state,c.defenderId,action.destination,'pushback');displace(state,c.attackerId,c.destinationHex,'capture');complete(state,c);
+    displace(state,c.defenderId,action.destination,'pushback');displace(state,c.attackerId,c.destinationHex,'capture');complete(state);
   }
 }

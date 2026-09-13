@@ -2,6 +2,10 @@
 
 Original title: Los Juegos del Dios Palomo. Source: owner's specification supplied September 12, 2026 in the project task. This durable reference transcribes the requirements in condensed form, retaining section numbers. The original supplied document takes precedence if wording differs. Prototype decisions do not amend these rules.
 
+## Latest owner correction takes precedence
+
+Read [COMBAT-CORRECTION.md](COMBAT-CORRECTION.md) before implementing combat. Combat now costs both Actions and ends the Turn; no movement continuation. A losing attacker retreats one approach hex. Blocked defender pushback causes a position swap. Conflicting historical sections below are superseded.
+
 ## Rulebook clarification received for Milestone 2
 
 The full owner-supplied [Rulebook v1.1](RULEBOOK-v1.1.txt) is preserved verbatim. Its §§4/14 establish Speed as the Dodge dice count; §24 adds Fervor from lost Health. Consult [DECISIONS.md](DECISIONS.md) for reconciliation and explicitly isolated prototype interpretations. The technical milestone sequence remains unchanged.
