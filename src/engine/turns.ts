@@ -7,6 +7,10 @@ export function beginTurn(state:GameState):void {
   phase(state,'TURN_START');
   const player=state.players[state.activePlayerId];
   player.actionsRemaining=0;
+  if(state.content){
+    delete state.content.catStep;delete state.content.catDie;delete state.content.catRolled;
+    for(const data of Object.values(state.content.players)){data.moved=false;data.bonusGranted=false;data.speedBonus=0;data.afterMovement=false;}
+  }
   if(state.finalDuel){grantActions(state);return;}
   phase(state,'CAT_MOVEMENT');
 }
@@ -30,5 +34,5 @@ export function grantActions(state:GameState):void {
   const p=state.players[state.activePlayerId];
   if(p.eliminated){endTurn(state);return;}
   if(state.arenaNumber===2&&!state.finalDuel&&!p.currentRat.inBurrow&&equal(p.currentRat.position,state.board.catSpawn)){p.fervor++;state.eventLog.push({type:'FERVOR_CHANGED',playerId:p.id,amount:1,reason:'Arena 2 center'});}
-  p.actionsRemaining=RULES.actionsPerTurn;phase(state,'PLAYER_ACTION');
+  p.actionsRemaining=(state.content?p.actionsRemaining:0)+RULES.actionsPerTurn;phase(state,'PLAYER_ACTION');
 }

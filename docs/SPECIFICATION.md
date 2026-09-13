@@ -4,7 +4,7 @@ Original title: Los Juegos del Dios Palomo. Source: owner's specification suppli
 
 ## Current rulebook and Attack clarification
 
-Read [RULEBOOK-v1.4.txt](RULEBOOK-v1.4.txt), the consolidated rulebook with session corrections integrated into the actual rule sections. Each Rat rolls exactly its card attackDice: Attack 2 rolls two dice, Attack 4 rolls four. Arena 1 Attack results 4, 5 and 6 each cause one Hit. Prototype stats are not official Rat designs. Milestone 3 implements Cat Turn movement, shared combat, respawn, persistent Health and eliminated-player interaction; all dice remain seeded.
+Read [RULEBOOK-v1.5.txt](RULEBOOK-v1.5.txt), the consolidated rulebook with session corrections integrated into the actual rule sections. Each Rat rolls exactly its card attackDice: Attack 2 rolls two dice, Attack 4 rolls four. Arena 1 Attack results 4, 5 and 6 each cause one Hit. Prototype stats are not official Rat designs. Milestone 3 implements Cat Turn movement, shared combat, respawn, persistent Health and eliminated-player interaction; all dice remain seeded.
 
 ## Latest owner correction takes precedence
 
@@ -31,7 +31,7 @@ The full owner-supplied [Rulebook v1.1](RULEBOOK-v1.1.txt) is preserved verbatim
 12. Each Rat rolls its individual Attack stat as its Attack dice count (Attack 2 = two dice); Speed is its Dodge dice count. Data-driven Rat card: id/name/maxHealth/attackDice/speed/optional ability/artwork. Runtime: ratId/ownerId/health/axial position/alive.
 13. Two drafted Rats hidden until used. Human sees both own cards; AI sees only own unrevealed cards.
 14. Receive three Rats, keep one, pass two right, receive two from left, keep one, discard remainder. Select Arena 1 Rat; reserve other for Arena 2.
-15. Standard Arena: two players use 19 radius-2 hexes with exterior adjacent Burrows; three/four players use 37 radius-3 hexes with Burrows on the outermost Arena ring. Players choose distinct legal Burrows in Turn order at setup. At least one entrance must remain clear of blocking terrain. Burrows are one-way on both board sizes. Voluntary End Turn is forbidden while in a Burrow. A direct attack against an entrance-blocking Cat is allowed; losing/tying returns the Rat to its Burrow, ends the Turn, and requires retry next Turn. Two connected Sewers, one rock and one crate use seeded placement that preserves legal entries and connectivity. Axial q,r; s=-q-r. Standard neighbors, distance, paths and directions.
+15. Standard Arena: two players use 19 radius-2 hexes with exterior adjacent Burrows; three/four players use 37 radius-3 hexes with Burrows on the outermost Arena ring. Players choose distinct legal Burrows in Turn order at setup. At least one entrance must remain clear of blocking terrain. Burrows are one-way on both board sizes. Voluntary End Turn is forbidden while in a Burrow. A direct attack against an entrance-blocking Rat or Cat is allowed; losing/tying returns the Rat to its Burrow, ends the Turn, and requires retry next Turn. Two connected Sewers, one rock and one crate use seeded placement that preserves legal entries and connectivity. Axial q,r; s=-q-r. Standard neighbors, distance, paths and directions.
 16. Terrain: normal, rock, crate, sewer, spawn, center. Hex coordinate, optional sewerId, Rat/Cat occupancy.
 17. One Move allows one through Speed hexes; may stop early.
 18. Rocks and large crates block traversal. Rat/Cat entry requires and consumes both Actions, triggers combat and ends the Turn after resolution.
@@ -49,7 +49,7 @@ The full owner-supplied [Rulebook v1.1](RULEBOOK-v1.1.txt) is preserved verbatim
 28. Explicit Attack and Dodge confirmation locks each roll; Attack cannot change after Dodge phase starts.
 29. Compare damage dealt in this combat. Attacker wins only if greater; defender wins every tie, including zero/zero.
 30. Losing defender is pushed to a winner-chosen adjacent legal empty hex. If none, living participants swap positions. Losing/tied Rat attacker retreats exactly one approach hex.
-31. No movement continues after combat. End the attacking Rat's Turn automatically after displacement.
+31. Normally end the attacking Rat's Turn after displacement. Supplied card-granted Actions and movement explicitly override that normal ending; resolve their effects before advancing Turn order.
 32. Simultaneous damage can kill both; remove both and award both Finish credits. If last two die, Arena ends without winner.
 33. Exactly one living Rat at any moment ends Arena immediately with that winner.
 34. After Round 5 rank only living Rats by Finishes, Attacks, Dodges, then remaining Health. Winner gets two Divine Favor. If all four ranking criteria remain tied for first, no winner or victory Favor is awarded.
@@ -140,8 +140,13 @@ The full owner-supplied [Rulebook v1.1](RULEBOOK-v1.1.txt) is preserved verbatim
 - Milestones 1–2 complete, including owner combat corrections.
 - Milestone 3: Cat movement once per Turn, neutral three-dice attacks, shared combat, respawn, persistent Health helper, eliminated-player movement and Finish credit. Mixed seeded replay and Cat unit tests verify the implementation.
 - Milestone 4 complete: 19/37-hex seeded Arenas with ordered Burrow placement and mandatory exit, five-Round/early scoring, public bets, Arena 2 transition and modifiers, Match completion and Final Duel.
-- Milestones 5–8 remain as originally planned.
+- Milestone 5: supplied Rat stats/abilities, Items with explicit timing windows, public Decrees and replacement/scoring are implemented. Oro cards and Cat-Dodge Decrees are excluded.
+- Milestones 6–8 remain as originally planned.
 
-Prototype Rat Attack stats now vary across 2, 3 and 4. They are test content, not the owner's final Rat designs.
+The prototype now deals two distinct supplied Rats per seat from the 18-card active pool; the physical draft remains a separate pending feature. Printed Attack, Health and Speed replace test stats.
 
 Milestone 5 content reference: see reference/DECREES.md and the supplied grid. Exclude Cat-specific Dodge objectives; retain Doma al gato (Cat defeat) and general Dodge objectives. Do not create a separate Cat-Dodge tracker.
+
+## Milestone 5 owner rulings
+
+Rulebook v1.5 section 56 governs the card implementation. Card-granted Actions/movement override normal combat Turn end. Remove every Oro card. Pacifista means zero damage dealt. Cat Finishes meet generic Finish objectives. Turno 5 means Round 5. Matching Attack pairs include misses; Místico deals three incoming Hits that remain Dodgeable and counterable. Die modifiers cap at six. Chile grants persistent normal Fervor. Esquivo requires at least one successful Dodge die. Clavo adds an extra push. A Rat blocking a Burrow entrance can be challenged using the same return-and-retry rule as the Cat.

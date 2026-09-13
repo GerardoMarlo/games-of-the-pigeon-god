@@ -10,7 +10,7 @@ export function Board({state,actions,send}:Props){
   return <section><svg viewBox="-210 -175 420 350" aria-label={`${count}-hex Arena with one-way Burrows`}>
     {tiles.map(tile=>{
       const {q,r}=tile.coordinate;
-      const action=actions.find(a=>a.type==='MOVE'&&key(a.path[a.path.length-1])===key(tile.coordinate)||(a.type==='SELECT_PUSHBACK'||a.type==='PLACE_BURROW')&&key(a.destination)===key(tile.coordinate));
+      const action=actions.find(a=>(a.type==='MOVE'||a.type==='EFFECT_ACTION_MOVE')&&key(a.path[a.path.length-1])===key(tile.coordinate)||(a.type==='SELECT_PUSHBACK'||a.type==='PLACE_BURROW'||a.type==='EFFECT_MOVE')&&key(a.destination)===key(tile.coordinate));
       const rat=Object.values(state.players).find(p=>p.currentRat.alive&&!p.currentRat.inBurrow&&key(p.currentRat.position)===key(tile.coordinate));
       const cat=state.cat.alive&&!state.cat.offBoard&&key(state.cat.position)===key(tile.coordinate);
       const label=rat?rat.id.toUpperCase():cat?'CAT':tile.terrain==='normal'?'':tile.terrain.toUpperCase();
@@ -23,5 +23,5 @@ export function Board({state,actions,send}:Props){
       const {q,r}=b.position,p=state.players[b.playerId??seats[i]],present=p.currentRat.alive&&p.currentRat.inBurrow;
       return <g key={key(b.position)} data-burrow transform={`translate(${48*(q+r/2)},${42*r})`} aria-label={`${p.id} Burrow${present?' occupied':' empty'}`}><polygon points={points} className="burrow"/><text textAnchor="middle" dy="-3">{p.id.toUpperCase()}</text><text textAnchor="middle" dy="9">{present?'IN BURROW':'BURROW'}</text></g>;
     })}
-  </svg><p>{count} Arena hexes; Burrows {count===19?'sit outside the perimeter':'occupy outer-ring hexes'}. Exit on your first Turn. You cannot voluntarily end a Turn in your Burrow. An entrance occupied by the Cat starts combat; a failed attack returns you to retry next Turn.</p><p>Combat costs both Actions and ends your Turn after displacement.</p></section>;
+  </svg><p>{count} Arena hexes; Burrows {count===19?'sit outside the perimeter':'occupy outer-ring hexes'}. Exit on your first Turn. You cannot voluntarily end a Turn in your Burrow. An entrance occupied by a Rat or the Cat starts combat; a failed attack returns you to retry next Turn.</p><p>Combat costs two Actions. Card-granted Actions or movement may continue after displacement.</p></section>;
 }

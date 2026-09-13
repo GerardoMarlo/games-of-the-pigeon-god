@@ -1,3 +1,5 @@
+import { claimDecrees } from './content/decrees';
+import { resetContentArena } from './content/state';
 import { beginPlacement } from './burrows';
 import { generateArena } from '../content/arena';
 import { carryCatToArena } from './cat';
@@ -27,6 +29,8 @@ export function finishArena(state:GameState):void {
   state.arenaWinnerId=winner?.id;
   for(const p of Object.values(state.players))p.actionsRemaining=0;
   if(winner)awardFavor(state,winner.id,RULES.arenaWinnerFavor);
+  claimDecrees(state,'end_of_arena');
+  if(state.content){for(const p of Object.values(state.content.players)){state.content.itemDiscard.push(...p.items);p.items=[];p.brasa=false;}state.content.effects=[];delete state.content.combat;}
   for(const p of Object.values(state.players))if(winner&&p.betTargetPlayerId===winner.id)awardFavor(state,p.id,1);
   state.arenaResults.push({arenaNumber:state.arenaNumber,winnerId:winner?.id,reason,ranking:ranked.map(p=>p.id),favor:Object.fromEntries(Object.values(state.players).map(p=>[p.id,p.divineFavor]))});
   state.eventLog.push({type:'ARENA_ENDED',winnerId:winner?.id});phase(state,'ARENA_END');
@@ -59,6 +63,7 @@ export function arenaTwoOrder(state:GameState):string[] {
   return [...state.seatOrder.slice(index),...state.seatOrder.slice(0,index)];
 }
 function startArenaTwo(state:GameState):void {
+  resetContentArena(state);
   state.turnOrder=arenaTwoOrder(state);state.activePlayerId=state.turnOrder[0];
   state.board=state.arenaTemplate?structuredClone(state.arenaTemplate):generateArena(state.rng,state.seatOrder.length);
   for(const [i,id] of state.seatOrder.entries()){
@@ -70,6 +75,7 @@ function startArenaTwo(state:GameState):void {
   state.eventLog.push({type:'ARENA_STARTED',arenaNumber:2});if(state.arenaTemplate){phase(state,'ROUND_START');beginTurn(state);}else beginPlacement(state);
 }
 function startDuel(state:GameState):void {
+  resetContentArena(state);
   const duel=state.finalDuel!;duel.stage='combat';duel.attempt++;
   state.board=generateArena(state.rng,duel.participants.length);state.cat.alive=false;state.cat.offBoard=true;
   // Preserve clockwise relative order of tied seats, without revealing reserves.

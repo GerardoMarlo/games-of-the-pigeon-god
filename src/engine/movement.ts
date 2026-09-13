@@ -22,9 +22,9 @@ export function traceMovement(state:GameState,playerId:string,path:HexCoordinate
     const to=path[i],tile=state.board.hexes[key(to)];
     if(!neighbors(current).some(h=>equal(h,to)) || !tile || ['rock','crate'].includes(tile.terrain)||isBurrow(state,to)) throw new Error('Blocked or nonadjacent path');
     if(i===0&&player.currentRat.inBurrow){
-      if(!burrowEntrances(state,current).some(h=>equal(h,to))||(!empty(state,to)&&occupant(state,to)!=='cat'))throw new Error('Burrow entry must be empty');
+      if(!burrowEntrances(state,current).some(h=>equal(h,to))||(!empty(state,to)&&!occupant(state,to)))throw new Error('Burrow entry must be empty');
     }
-    if(++spent>card.speed) throw new Error('Speed exceeded');
+    if(++spent>card.speed+(state.content?.players[playerId].speedBonus??0)) throw new Error('Speed exceeded');
     if(tile.terrain==='sewer') {
       const paired=Object.values(state.board.hexes).filter(t=>t.terrain==='sewer' && t.sewerId===tile.sewerId && !equal(t.coordinate,to));
       const portal=path[++i],exit=path[++i];
@@ -43,14 +43,14 @@ export function traceMovement(state:GameState,playerId:string,path:HexCoordinate
 export function movementPaths(state:GameState,playerId:string):HexCoordinate[][] {
   const p=state.players[playerId];
   if(!p || state.phase!=='PLAYER_ACTION' || state.activePlayerId!==playerId || p.eliminated || !p.currentRat.alive || p.actionsRemaining<1) return [];
-  const speed=p.draftedRats.find(r=>r.id===p.currentRat.ratId)?.speed??0;
+  const speed=(p.draftedRats.find(r=>r.id===p.currentRat.ratId)?.speed??0)+(state.content?.players[playerId].speedBonus??0);
   const queue=[{at:p.currentRat.position,path:[] as HexCoordinate[],cost:0}];
   const seen=new Set([key(p.currentRat.position)]), results:HexCoordinate[][]=[];
   while(queue.length) {
     const node=queue.shift()!;
     if(node.cost>=speed) continue;
     for(const to of neighbors(node.at)) {
-      if(node.cost===0&&p.currentRat.inBurrow&&(!burrowEntrances(state,node.at).some(h=>equal(h,to))||(!empty(state,to)&&occupant(state,to)!=='cat')))continue;
+      if(node.cost===0&&p.currentRat.inBurrow&&(!burrowEntrances(state,node.at).some(h=>equal(h,to))||(!empty(state,to)&&!occupant(state,to))))continue;
       const tile=state.board.hexes[key(to)];
       if(!tile || ['rock','crate'].includes(tile.terrain)||isBurrow(state,to)) continue;
       const extensions:HexCoordinate[][]=[];

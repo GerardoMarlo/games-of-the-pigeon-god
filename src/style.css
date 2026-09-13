@@ -3,3 +3,5 @@
 .combat{border:1px solid #d7b474;padding:14px;margin-top:16px}.combat h2{font-size:18px}.combat h3{font-size:14px}.dice{display:flex;gap:8px;flex-wrap:wrap}.dice button{min-width:44px;font-size:22px}.dice button:disabled{opacity:1;background:#343a44;color:#b8bec7}
 
 .burrow{fill:#1d2722;stroke:#99bca3;stroke-width:2;stroke-dasharray:4 3}section[aria-label="Match progress"] button{margin:4px}
+
+section[aria-label="Cards and effects"] button{margin:4px;max-width:100%;text-align:left}.decrees{display:grid;gap:8px}.decrees article{margin:0;padding:8px}.decrees p{font-size:12px}

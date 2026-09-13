@@ -1,5 +1,7 @@
 # Owner combat correction — September 13, 2026
 
+Milestone 5 addendum: these are the base combat rules. Owner-approved card-granted Actions and movement override normal Turn completion; see [Rulebook v1.5 section 56](RULEBOOK-v1.5.txt).
+
 This correction supersedes conflicting rules in Technical Specification v1.0 (§§18–19,30–31,82) and Rulebook v1.1 (§§9–10,18–19). The original rulebook remains preserved verbatim for history.
 
 - Entering a Rat or Cat hex initiates combat and consumes both Actions. A combat-triggering Move therefore requires two available Actions; ordinary movement still costs one. If only one Action remains, occupied targets are excluded by legal-action generation and rejected by dispatch.

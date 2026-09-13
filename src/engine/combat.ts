@@ -1,3 +1,8 @@
+import { ability } from './content/state';
+import { combatRewards,diceBonus } from './content/abilities';
+import { claimDecrees } from './content/decrees';
+import { resumeEffects } from './content/effects';
+import { finishCatStep } from './cat';
 import { isBurrow } from './burrows';
 import { checkEliminationEnd } from './lifecycle';
 import { respawnCat } from './cat';
@@ -17,19 +22,21 @@ export function rollResult(attack:readonly number[],dodge:readonly number[],aren
 }
 export function combatActor(state:GameState):string {
   const c=state.combat;
-  return c?.stage==='DODGE'?c.defenderId:c?.stage==='PUSHBACK'?(c.winnerId==='cat'?state.activePlayerId:c.winnerId!):state.activePlayerId;
+  return c&&['ATTACK_RESPONSE','BEFORE_DODGE'].includes(c.stage)?c.defenderId:c?.stage==='DODGE'?c.defenderId:c?.stage==='PUSHBACK'?(c.winnerId==='cat'?state.activePlayerId:c.winnerId!):state.activePlayerId;
 }
 function roll(state:GameState,playerId:string,kind:'ATTACK'|'DODGE'):number[] {
   const p=state.players[playerId],card=p?.draftedRats.find(r=>r.id===p.currentRat.ratId);
-  const count=playerId==='cat'?RULES.catAttackDice:kind==='ATTACK'?card!.attackDice:card!.speed;
+  const base=playerId==='cat'?RULES.catAttackDice:kind==='ATTACK'?card!.attackDice:card!.speed;
+  const count=Math.max(0,base+(state.content&&playerId!=='cat'?diceBonus(state,playerId,kind):0));
   const dice=Array.from({length:count},()=>rollD6(state.rng));
   state.eventLog.push({type:'ROLL',playerId,kind,dice:[...dice]});return dice;
 }
 export function startCombat(state:GameState,defenderId:string,sourceHex:HexCoordinate,destinationHex:HexCoordinate,options?:{origin:'cat_turn'|'cat_respawn';resume:'actions'|'end_turn';direction?:HexCoordinate;catCreditPlayerId?:string}):void {
   const attackerId=options?'cat':state.activePlayerId;
   state.combat={attackerId,defenderId,sourceHex,destinationHex,stage:'ATTACK',attackerRoll:[],defenderRoll:[],attackerConfirmed:false,defenderConfirmed:false,attackerDamage:0,defenderDamage:0,origin:options?.origin??'rat_move',resume:options?.resume??'end_turn',direction:options?.direction,catCreditPlayerId:options?.catCreditPlayerId};
-  if(!options)state.players[attackerId].actionsRemaining=0;
+  if(!options)state.players[attackerId].actionsRemaining=Math.max(0,state.players[attackerId].actionsRemaining-1);
   state.phase='COMBAT';state.eventLog.push({type:'COMBAT_TRIGGERED',attackerId,defenderId},{type:'PHASE_CHANGED',phase:'COMBAT'});
+  if(state.content){state.content.combat={attackDice:0,dodgeDice:0,cancelHits:0,cancelAttack:false,attackAbilityUsed:false,dodgeAbilityUsed:false};state.combat.stage='BEFORE_ATTACK';return;}
   state.combat.attackerRoll=roll(state,attackerId,'ATTACK');
   if(attackerId==='cat'){
     state.combat.attackerConfirmed=true;state.combat.stage='DODGE';
@@ -46,6 +53,10 @@ export function pushbackHexes(state:GameState):HexCoordinate[] {
 export function combatActions(state:GameState,playerId:string):GameAction[] {
   const c=state.combat;
   if(state.phase!=='COMBAT'||!c||playerId!==combatActor(state))return [];
+  if(c.stage==='BEFORE_ATTACK')return [{type:'ROLL_ATTACK',playerId}];
+  if(c.stage==='ATTACK_RESPONSE')return [{type:'ACCEPT_ATTACK',playerId}];
+  if(c.stage==='BEFORE_DODGE')return [{type:'ROLL_DODGE',playerId}];
+  if(c.stage==='AFTER_DAMAGE')return [{type:'RESOLVE_COMBAT',playerId}];
   if(c.stage==='PUSHBACK')return pushbackHexes(state).map(destination=>({type:'SELECT_PUSHBACK',playerId,destination}));
   const actions:GameAction[]=[{type:c.stage==='ATTACK'?'CONFIRM_ATTACK':'CONFIRM_DODGE',playerId}];
   if(state.players[playerId].fervor>0)(c.stage==='ATTACK'?c.attackerRoll:c.defenderRoll).forEach((_,dieIndex)=>actions.push({type:'SPEND_FERVOR',playerId,dieIndex}));
@@ -69,7 +80,13 @@ function complete(state:GameState,c:CombatState):void {
   const ended=checkEliminationEnd(state);
   if(!state.finalDuel&&!state.cat.alive && respawnCat(state,true,c.resume??'end_turn',ended,c.catCreditPlayerId))return;
   if(ended)return;
-  if(c.resume==='actions')grantActions(state);else endTurn(state,c.origin==='rat_move'&&c.defenderId==='cat'&&isBurrow(state,c.sourceHex));
+  if(state.content){
+    delete state.content.combat;
+    state.content.resume=c.resume==='actions'?'actions':'end_turn';state.content.combatRetreat=c.origin==='rat_move'&&isBurrow(state,c.sourceHex);
+    if(c.resume==='actions'&&!state.content.effects.length){finishCatStep(state);return;}
+    resumeEffects(state);return;
+  }
+  if(c.resume==='actions')grantActions(state);else endTurn(state,c.origin==='rat_move'&&isBurrow(state,c.sourceHex));
 }
 function health(state:GameState,id:string):number {return id==='cat'?state.cat.health:state.players[id].currentRat.health;}
 function alive(state:GameState,id:string):boolean {return id==='cat'?state.cat.alive:state.players[id].currentRat.alive;}
@@ -92,6 +109,14 @@ function finish(state:GameState,victimId:string,killerId:string):void {
 }
 function resolve(state:GameState,c:CombatState):void {
   const result=rollResult(c.attackerRoll,c.defenderRoll,state.finalDuel?1:state.arenaNumber);
+  if(state.content){
+    const ctx=state.content.combat!;
+    const hits=ability(state,c.attackerId)==='twins_three'&&new Set(c.attackerRoll).size<c.attackerRoll.length?3:attackHits(c.attackerRoll,state.finalDuel?1:state.arenaNumber);
+    const sixes=c.defenderRoll.filter(d=>d===6).length;
+    result.incoming=ctx.cancelAttack?0:Math.max(0,hits-result.dodges-(ability(state,c.defenderId)==='double_cancel'?sixes:0)-ctx.cancelHits);
+    result.counter=sixes*(ability(state,c.defenderId)==='double_counter'?2:1);
+    if(sixes&&state.content.players[c.defenderId]?.brasa){result.counter++;state.content.players[c.defenderId].brasa=false;}
+  }
   c.attackerDamage=RULES.capDamageToHealth?Math.min(health(state,c.defenderId),result.incoming):result.incoming;
   c.defenderDamage=RULES.capDamageToHealth?Math.min(health(state,c.attackerId),result.counter):result.counter;
   // Both values are computed before either participant loses Health.
@@ -104,6 +129,10 @@ function resolve(state:GameState,c:CombatState):void {
   if(defender&&!alive(state,c.attackerId))tracker(state,defender,'finishes',1);
   c.winnerId=c.attackerDamage>c.defenderDamage?c.attackerId:c.defenderId;
   state.eventLog.push({type:'COMBAT_RESOLVED',attackerDamage:c.attackerDamage,defenderDamage:c.defenderDamage,winnerId:c.winnerId});
+  if(state.content){combatRewards(state);claimDecrees(state,'immediate');if(Object.values(state.players).filter(p=>p.currentRat.alive).length<=1){complete(state,c);return;}c.stage='AFTER_DAMAGE';return;}
+  finishDisplacement(state,c);
+}
+function finishDisplacement(state:GameState,c:CombatState):void {
   if(alive(state,c.attackerId)&&!alive(state,c.defenderId))displace(state,c.attackerId,c.destinationHex,'capture');
   else if(alive(state,c.attackerId)&&alive(state,c.defenderId)){
     if(c.winnerId===c.attackerId){
@@ -127,12 +156,17 @@ export function applyCombatAction(state:GameState,action:GameAction):void {
   const c=state.combat;
   const legal=combatActions(state,action.playerId).some(a=>a.type===action.type && (a.type!=='SPEND_FERVOR'||action.type==='SPEND_FERVOR'&&a.dieIndex===action.dieIndex) && (a.type!=='SELECT_PUSHBACK'||action.type==='SELECT_PUSHBACK'&&equal(a.destination,action.destination)));
   if(!c||!legal)throw new Error('Illegal combat action');
-  if(action.type==='SPEND_FERVOR'){
+  if(action.type==='ROLL_ATTACK'){
+    c.attackerRoll=roll(state,c.attackerId,'ATTACK');c.stage=c.attackerId==='cat'?'ATTACK_RESPONSE':'ATTACK';c.attackerConfirmed=c.attackerId==='cat';
+  }else if(action.type==='ACCEPT_ATTACK'){c.stage='BEFORE_DODGE';
+  }else if(action.type==='ROLL_DODGE'){c.defenderRoll=roll(state,c.defenderId,'DODGE');c.stage='DODGE';
+  }else if(action.type==='RESOLVE_COMBAT'){finishDisplacement(state,c);
+  }else if(action.type==='SPEND_FERVOR'){
     const dice=c.stage==='ATTACK'?c.attackerRoll:c.defenderRoll,kind=c.stage==='ATTACK'?'ATTACK':'DODGE',before=dice[action.dieIndex];
     fervor(state,state.players[action.playerId],-1,'Reroll');dice[action.dieIndex]=rollD6(state.rng);
     state.eventLog.push({type:'REROLL',playerId:action.playerId,kind,index:action.dieIndex,before,after:dice[action.dieIndex]});
   }else if(action.type==='CONFIRM_ATTACK'){
-    c.attackerConfirmed=true;c.stage='DODGE';state.eventLog.push({type:'ROLL_CONFIRMED',playerId:action.playerId,kind:'ATTACK'});if(c.defenderId==='cat'){c.defenderConfirmed=true;resolve(state,c);}else c.defenderRoll=roll(state,c.defenderId,'DODGE');
+    c.attackerConfirmed=true;c.stage='DODGE';state.eventLog.push({type:'ROLL_CONFIRMED',playerId:action.playerId,kind:'ATTACK'});if(c.defenderId==='cat'){c.defenderConfirmed=true;resolve(state,c);}else if(state.content)c.stage='ATTACK_RESPONSE';else c.defenderRoll=roll(state,c.defenderId,'DODGE');
   }else if(action.type==='CONFIRM_DODGE'){
     c.defenderConfirmed=true;state.eventLog.push({type:'ROLL_CONFIRMED',playerId:action.playerId,kind:'DODGE'});resolve(state,c);
   }else if(action.type==='SELECT_PUSHBACK'){

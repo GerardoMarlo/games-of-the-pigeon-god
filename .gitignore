@@ -3,3 +3,4 @@ dist/
 .pnpm-store/
 coverage/
 *.local
+*.local.png

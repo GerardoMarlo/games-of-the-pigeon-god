@@ -8,7 +8,7 @@ import { occupant } from './movement';
 import { grantActions,endTurn } from './turns';
 import type { GameState } from './types';
 function placed(s:GameState):GameState {while(s.phase==='ARENA_SETUP')s=dispatch(s,getLegalActions(s,s.activePlayerId)[0]);return s;}
-function game():GameState{return placed(createGame({seed:12345,playerCount:4}));}
+function game():GameState{return placed(createGame({content:false,seed:12345,playerCount:4}));}
 function enter(s:GameState,id:string,position={q:0,r:1}):void {s.players[id].currentRat.position=position;s.players[id].currentRat.inBurrow=false;}
 function eliminate(s:GameState,id:string):void {const p=s.players[id];p.currentRat.health=0;p.currentRat.alive=false;p.eliminated=true;p.eliminationRound=s.roundNumber;p.actionsRemaining=0;}
 function nextArena(s:GameState):GameState {finishArena(s);s=dispatch(s,{type:'CONTINUE_ARENA',playerId:s.activePlayerId});return placed(dispatch(s,{type:'START_ARENA_2',playerId:s.activePlayerId}));}
@@ -41,7 +41,7 @@ describe('Match completion and Final Duel',()=>{
 });
 describe('deterministic full Arena lifecycle',()=>{
   it.each([2,3,4] as const)('finishes a %i-player Match on the real board using only legal decisions',playerCount=>{
-    let s=createGame({seed:77,playerCount});
+    let s=createGame({content:false,seed:77,playerCount});
     for(let step=0;step<800&&s.phase!=='MATCH_END';step++){
       const actions=s.seatOrder.flatMap(id=>getLegalActions(s,id)).filter(a=>a.type!=='SELECT_BET');expect(actions.length).toBeGreaterThan(0);
       let action=actions.find(a=>a.type!=='MOVE'&&a.type!=='END_TURN'&&a.type!=='SPEND_FERVOR');

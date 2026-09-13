@@ -5,5 +5,5 @@ export const RULES = { actionsPerTurn:2, roundsPerArena:5, catHealth:9, arenaWin
   // Damage successfully dealt means actual Health removed; excludes overkill.
   capDamageToHealth:true,
 } as const;
-// Milestone boundary: draft and Arena transition remain deferred.
+// Prototype boundary: full draft and AI control remain deferred.
 export const PROTOTYPE = { manualOpponentControl:true, endTurnAllowed:true } as const;

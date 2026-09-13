@@ -24,8 +24,13 @@ export function respawnCat(state:GameState,killed:boolean,resume:'actions'|'end_
   }
   state.cat.offBoard=false;return false;
 }
+export function finishCatStep(state:GameState):void {
+  if(state.content){state.content.catStep='after';state.phase='CAT_MOVEMENT';return;}
+  if(state.players[state.activePlayerId].eliminated)endTurn(state);else grantActions(state);
+}
 export function moveCat(state:GameState):void {
-  const die=rollD6(state.rng),direction=directions[die-1],from={...state.cat.position};
+  if(state.content&&!state.content.catStep){state.content.catDie=rollD6(state.rng);state.content.catRolled=true;state.content.catStep='rolled';state.eventLog.push({type:'CONTENT',message:`Cat direction rolled: ${state.content.catDie}.`});return;}
+  const die=state.content?.catDie??rollD6(state.rng),direction=directions[die-1],from={...state.cat.position};
   const to={q:from.q+direction.q,r:from.r+direction.r},tile=state.board.hexes[key(to)];
   const resume=state.players[state.activePlayerId].eliminated?'end_turn':'actions';
   const catCreditPlayerId=resume==='end_turn'?state.activePlayerId:undefined;
@@ -36,6 +41,6 @@ export function moveCat(state:GameState):void {
     if(defenderId && defenderId!=='cat'){startCombat(state,defenderId,from,to,{origin:'cat_turn',resume,direction,catCreditPlayerId});return;}
     state.cat.position=to;
   }
-  if(resume==='actions')grantActions(state);else endTurn(state);
+  finishCatStep(state);
 }
 export function catAtSpawn(state:GameState):boolean {return !state.cat.offBoard&&equal(state.cat.position,state.cat.spawnPosition);}
