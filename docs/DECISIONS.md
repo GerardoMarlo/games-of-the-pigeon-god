@@ -19,7 +19,7 @@ See [COMBAT-CORRECTION.md](COMBAT-CORRECTION.md): combat requires and consumes b
 
 ## Prototype boundaries
 
-- The owner confirmed exactly 19 interior hexes, random Sewers/rock/crate and exterior tangent Burrows. Milestone 4 implements this. Seeded terrain is limited to outer-ring non-entry hexes to maintain connectivity and clear center pushback; Burrows are not part of the 19.
+- The current owner correction uses 19 hexes plus exterior Burrows for two players, and 37 hexes including outer-ring Burrows for three/four. Burrows are selected in Turn order. Random terrain uses the radius-2 ring and keeps center neighbors clear.
 - Rat stats are still placeholders; no draft. Two test Rats assigned per seat, only the deployed opponent Rat is visible.
 - All seats manually controlled; controller labels do not imply implemented AI.
 - End Turn remains a configurable prototype control (PROTOTYPE.endTurnAllowed); confirm whether passing unused Actions is allowed in the final game.
@@ -38,14 +38,20 @@ See [COMBAT-CORRECTION.md](COMBAT-CORRECTION.md): combat requires and consumes b
 
 The owner approved blocked Cat movement staying in place, occupied respawn triggering combat, and normal Rat-initiated Cat pushback/swap. They explicitly chose player-selected legal Cat pushback after a lost respawn combat; no deterministic nearest-hex rule is used. Active player controls neutral winner displacement when respawn has no movement direction.
 
-Attack dice already used the Rat card stat; identical placeholder cards concealed that behavior. Owner approved varied test Attack stats 2/3/4. Attack 4+ hits in Arena 1; there is no universal Rat Attack count. The full consolidated rulebook is now v1.2.
+Attack dice already used the Rat card stat; identical placeholder cards concealed that behavior. Owner approved varied test Attack stats 2/3/4. Attack 4+ hits in Arena 1; there is no universal Rat Attack count. The current consolidated rulebook is v1.4 (prior versions are archived).
 
 Cat Health carry is now wired into the Arena 2 transition. Completed Arenas do not start new respawn combat; a Cat respawning into an occupied end-of-Arena spawn remains staged until next Arena setup.
 
 ## Milestone 4 owner decisions
 
-Burrow entry must be empty; this avoids a combat retreat violating the one-way rule. Living Rats in Burrows count as participants; the owner has not set a mandatory deployment deadline. Burrow entry costs one movement, and further travel can use the same Move's remaining Speed.
+Living Rats in Burrows count as participants. The owner now requires departure on the first Turn and forbids voluntary End Turn while in a Burrow. The Cat may be challenged directly from a Burrow; the owner explicitly approved retreat back into that Burrow and retry next Turn after a lost/tied direct attack. Other Rat-occupied entrances retain the earlier empty-entry requirement. Burrow entry costs one movement, and further travel can use the same Move's remaining Speed.
 
-Duel seating preserves clockwise order among tied participants. A fresh seeded 19-hex layout is generated for Arena 2 and the Final Duel, including a restarted duel. The duel has no Cat/start-of-Turn center reward and skips eliminated duelists.
+Duel seating preserves clockwise order among tied participants. A fresh seeded layout sized for the number of participants is generated for Arena 2 and the Final Duel, including a restarted duel. The duel has no Cat/start-of-Turn center reward and skips eliminated duelists.
 
 Public early-elimination bets can be selected outside unresolved combat while the Arena continues; a correct bet pays once at scoring. Full Item/Decree systems remain Milestone 5. The Decree reference grid is saved unchanged, with Cat-Dodge objectives excluded in its review catalog and Doma al gato retained.
+
+## Burrow placement correction
+
+Current Rulebook v1.4 section 6 supersedes prior fixed-spawn and all-player-count 19-hex rules. Setup collects a PLACE_BURROW action from each player in Turn order before starting any Turn. Every choice is validated by the engine, including duplicates, perimeter, terrain, and preserving an entrance for prior choices. The player can use any adjacent legal entrance. At least one entrance must be clear of permanent blockers; temporary Cat occupancy permits combat. Cat movement remains first, with no deferred roll.
+
+Burrow selection repeats on new Arena/duel layouts; duel size uses participating duelists. These extend the existing fresh-layout lifecycle consistently. The physical rule supplies no fixed terrain coordinates; seeded radius-2 placement is an isolated generator choice. Sewers are not direct Burrow entrances under the retained mandatory empty-entry rule.

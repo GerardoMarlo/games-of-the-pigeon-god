@@ -1,3 +1,4 @@
+import { beginPlacement } from './burrows';
 import { generateArena } from '../content/arena';
 import { carryCatToArena } from './cat';
 import { key } from './hex';
@@ -47,7 +48,7 @@ export function checkEliminationEnd(state:GameState):boolean {
 function deploy(state:GameState,p:PlayerState,ratId:string,index:number):void {
   const card=p.draftedRats.find(r=>r.id===ratId);
   if(!card)throw new Error('Rat is not owned by this player');
-  p.currentRat={ratId,ownerId:p.id,health:card.maxHealth,alive:true,position:{...state.board.spawns[index]},inBurrow:!state.board.hexes[key(state.board.spawns[index])]};
+  p.currentRat={ratId,ownerId:p.id,health:card.maxHealth,alive:true,position:{...(state.board.spawns[index]??state.board.catSpawn)},inBurrow:!state.arenaTemplate||!state.board.hexes[key(state.board.spawns[index])]};
   p.attacks=0;p.dodges=0;p.finishes=0;p.fervor=0;p.actionsRemaining=0;p.eliminated=false;
   delete p.eliminationRound;delete p.betTargetPlayerId;
 }
@@ -59,18 +60,18 @@ export function arenaTwoOrder(state:GameState):string[] {
 }
 function startArenaTwo(state:GameState):void {
   state.turnOrder=arenaTwoOrder(state);state.activePlayerId=state.turnOrder[0];
-  state.board=state.arenaTemplate?structuredClone(state.arenaTemplate):generateArena(state.rng);
+  state.board=state.arenaTemplate?structuredClone(state.arenaTemplate):generateArena(state.rng,state.seatOrder.length);
   for(const [i,id] of state.seatOrder.entries()){
     const p=state.players[id],reserved=p.draftedRats.find(r=>r.id!==p.currentRat.ratId)!;
     deploy(state,p,reserved.id,i);
   }
   state.arenaNumber=2;state.roundNumber=1;delete state.arenaWinnerId;delete state.combat;
   carryCatToArena(state);state.cat.alive=true;
-  state.eventLog.push({type:'ARENA_STARTED',arenaNumber:2});phase(state,'ROUND_START');beginTurn(state);
+  state.eventLog.push({type:'ARENA_STARTED',arenaNumber:2});if(state.arenaTemplate){phase(state,'ROUND_START');beginTurn(state);}else beginPlacement(state);
 }
 function startDuel(state:GameState):void {
   const duel=state.finalDuel!;duel.stage='combat';duel.attempt++;
-  state.board=generateArena(state.rng);state.cat.alive=false;state.cat.offBoard=true;
+  state.board=generateArena(state.rng,duel.participants.length);state.cat.alive=false;state.cat.offBoard=true;
   // Preserve clockwise relative order of tied seats, without revealing reserves.
   state.turnOrder=state.seatOrder.filter(id=>duel.participants.includes(id));
   for(const p of Object.values(state.players)){
@@ -79,7 +80,7 @@ function startDuel(state:GameState):void {
     else {p.eliminated=true;p.currentRat.alive=false;p.currentRat.health=0;p.actionsRemaining=0;}
   }
   state.roundNumber=1;state.activePlayerId=state.turnOrder[0];delete state.combat;
-  state.eventLog.push({type:'DUEL_STARTED',attempt:duel.attempt});beginTurn(state);
+  state.eventLog.push({type:'DUEL_STARTED',attempt:duel.attempt});beginPlacement(state);
 }
 export function lifecycleActions(state:GameState,playerId:string):GameAction[] {
   if(!state.players[playerId])return [];

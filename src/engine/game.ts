@@ -1,3 +1,4 @@
+import { beginPlacement,isBurrow,placeBurrow,placementActions } from './burrows';
 import { generateArena } from '../content/arena';
 import { applyLifecycleAction, lifecycleActions } from './lifecycle';
 import { moveCat } from './cat';
@@ -17,14 +18,15 @@ export function assertInvariants(state:GameState):void {
     if([rat.health,p.actionsRemaining,p.divineFavor,p.fervor,p.attacks,p.dodges,p.finishes].some(n=>!Number.isSafeInteger(n)||n<0))throw new Error('Invalid resource');
     if(rat.alive!==(rat.health>0)||p.eliminated===rat.alive)throw new Error('Invalid life state');
     if(rat.alive) {
+      if(state.burrowPlacement&&!state.burrowPlacement.placed.includes(p.id))continue;
       if(rat.inBurrow){
         const spawn=state.board.spawns[state.seatOrder.indexOf(p.id)];
         const duelSpawn=state.finalDuel?.stage==='combat'?state.board.spawns[state.turnOrder.indexOf(p.id)]:spawn;
-        if(state.board.hexes[key(rat.position)]||!duelSpawn||!equal(rat.position,duelSpawn))throw new Error('Invalid Burrow');
+        if(!isBurrow(state,rat.position)||!duelSpawn||!equal(rat.position,duelSpawn))throw new Error('Invalid Burrow');
         continue;
       }
       const tile=state.board.hexes[key(rat.position)];
-      if(!tile || ['rock','crate','sewer'].includes(tile.terrain) || occupied.has(key(rat.position)) || (state.cat.alive && !state.cat.offBoard && equal(rat.position,state.cat.position))) throw new Error('Invalid occupancy');
+      if(!tile || isBurrow(state,rat.position) || ['rock','crate','sewer'].includes(tile.terrain) || occupied.has(key(rat.position)) || (state.cat.alive && !state.cat.offBoard && equal(rat.position,state.cat.position))) throw new Error('Invalid occupancy');
       occupied.add(key(rat.position));
     }
   }
@@ -36,25 +38,27 @@ export function createGame(config:GameConfig):GameState {
   const rng=seeded(config.seed);
   const ids=Array.from({length:config.playerCount},(_,i)=>`p${i+1}`);
   const first=Math.floor(next(rng)*ids.length),turnOrder=[...ids.slice(first),...ids.slice(0,first)];
-  const board=structuredClone(config.board??generateArena(rng));
-  if(board.spawns.length<config.playerCount)throw new Error('Insufficient spawns');
+  const board=structuredClone(config.board??generateArena(rng,config.playerCount));
+  if(config.board&&board.spawns.length<config.playerCount)throw new Error('Insufficient spawns');
   const state:GameState={phase:'ARENA_SETUP',arenaNumber:1,roundNumber:1,activePlayerId:turnOrder[0],turnOrder,players:{},seatOrder:ids,arenaResults:[],arenaTemplate:config.board?structuredClone(config.board):undefined,board,cat:{maxHealth:9,health:9,position:{...board.catSpawn},spawnPosition:{...board.catSpawn},alive:true},rng,eventLog:[]};
-  ids.forEach((id,i)=>{const cards=structuredClone(prototypeRats.slice(i*2,i*2+2));state.players[id]={id,controller:i===0?'human':'ai',divineFavor:0,draftedRats:cards,currentRat:{ratId:cards[0].id,ownerId:id,health:cards[0].maxHealth,position:{...board.spawns[i]},alive:true,inBurrow:!board.hexes[key(board.spawns[i])]},eliminated:false,attacks:0,dodges:0,finishes:0,fervor:0,actionsRemaining:0};});
-  phase(state,'ROUND_START');beginTurn(state);assertInvariants(state);return state;
+  ids.forEach((id,i)=>{const cards=structuredClone(prototypeRats.slice(i*2,i*2+2));state.players[id]={id,controller:i===0?'human':'ai',divineFavor:0,draftedRats:cards,currentRat:{ratId:cards[0].id,ownerId:id,health:cards[0].maxHealth,position:{...(board.spawns[i]??board.catSpawn)},alive:true,inBurrow:!config.board||!board.hexes[key(board.spawns[i])]},eliminated:false,attacks:0,dodges:0,finishes:0,fervor:0,actionsRemaining:0};});
+  if(config.board){phase(state,'ROUND_START');beginTurn(state);}else beginPlacement(state);assertInvariants(state);return state;
 }
 export function getLegalActions(state:GameState,playerId:string):GameAction[] {
+  if(state.phase==='ARENA_SETUP')return placementActions(state,playerId);
   const extra=lifecycleActions(state,playerId);
   if(extra.length&&extra[0].type!=='SELECT_BET')return extra;
   if(state.phase==='CAT_MOVEMENT')return playerId===state.activePlayerId?[{type:'ROLL_CAT_MOVEMENT',playerId},...extra]:extra;
   if(state.phase==='COMBAT')return combatActions(state,playerId);
   if(state.phase!=='PLAYER_ACTION' || state.activePlayerId!==playerId || !state.players[playerId]) return extra;
   const actions:GameAction[]=movementPaths(state,playerId).map(path=>({type:'MOVE',playerId,path}));
-  if(PROTOTYPE.endTurnAllowed) actions.push({type:'END_TURN',playerId});
+  if(PROTOTYPE.endTurnAllowed&&!state.players[playerId].currentRat.inBurrow) actions.push({type:'END_TURN',playerId});
   return [...actions,...extra];
 }
 export function dispatch(input:GameState,action:GameAction):GameState {
   action=structuredClone(action);
   const state=structuredClone(input);
+  if(action.type==='PLACE_BURROW'){placeBurrow(state,action);assertInvariants(state);return state;}
   if(['CONTINUE_ARENA','START_ARENA_2','SELECT_DUEL_RAT','SELECT_BET'].includes(action.type)){applyLifecycleAction(state,action);assertInvariants(state);return state;}
   if(state.phase==='CAT_MOVEMENT' && action.type==='ROLL_CAT_MOVEMENT' && action.playerId===state.activePlayerId){moveCat(state);assertInvariants(state);return state;}
   if(state.phase==='COMBAT'){applyCombatAction(state,action);assertInvariants(state);return state;}

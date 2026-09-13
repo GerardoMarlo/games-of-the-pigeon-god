@@ -4,7 +4,7 @@ Original title: Los Juegos del Dios Palomo. Source: owner's specification suppli
 
 ## Current rulebook and Attack clarification
 
-Read [RULEBOOK-v1.3.txt](RULEBOOK-v1.3.txt), the consolidated rulebook with session corrections integrated into the actual rule sections. Each Rat rolls exactly its card attackDice: Attack 2 rolls two dice, Attack 4 rolls four. Arena 1 Attack results 4, 5 and 6 each cause one Hit. Prototype stats are not official Rat designs. Milestone 3 implements Cat Turn movement, shared combat, respawn, persistent Health and eliminated-player interaction; all dice remain seeded.
+Read [RULEBOOK-v1.4.txt](RULEBOOK-v1.4.txt), the consolidated rulebook with session corrections integrated into the actual rule sections. Each Rat rolls exactly its card attackDice: Attack 2 rolls two dice, Attack 4 rolls four. Arena 1 Attack results 4, 5 and 6 each cause one Hit. Prototype stats are not official Rat designs. Milestone 3 implements Cat Turn movement, shared combat, respawn, persistent Health and eliminated-player interaction; all dice remain seeded.
 
 ## Latest owner correction takes precedence
 
@@ -31,7 +31,7 @@ The full owner-supplied [Rulebook v1.1](RULEBOOK-v1.1.txt) is preserved verbatim
 12. Each Rat rolls its individual Attack stat as its Attack dice count (Attack 2 = two dice); Speed is its Dodge dice count. Data-driven Rat card: id/name/maxHealth/attackDice/speed/optional ability/artwork. Runtime: ratId/ownerId/health/axial position/alive.
 13. Two drafted Rats hidden until used. Human sees both own cards; AI sees only own unrevealed cards.
 14. Receive three Rats, keep one, pass two right, receive two from left, keep one, discard remainder. Select Arena 1 Rat; reserve other for Arena 2.
-15. Standard Arena: exactly 19 radius-2 interior hexes plus exterior tangent one-way Burrows. Two connected Sewers, one rock and one crate use seeded placement that preserves legal entries and connectivity. Axial q,r; s=-q-r. Standard neighbors, distance, paths and directions.
+15. Standard Arena: two players use 19 radius-2 hexes with exterior adjacent Burrows; three/four players use 37 radius-3 hexes with Burrows on the outermost Arena ring. Players choose distinct legal Burrows in Turn order at setup. At least one entrance must remain clear of blocking terrain. Burrows are one-way on both board sizes. Voluntary End Turn is forbidden while in a Burrow. A direct attack against an entrance-blocking Cat is allowed; losing/tying returns the Rat to its Burrow, ends the Turn, and requires retry next Turn. Two connected Sewers, one rock and one crate use seeded placement that preserves legal entries and connectivity. Axial q,r; s=-q-r. Standard neighbors, distance, paths and directions.
 16. Terrain: normal, rock, crate, sewer, spawn, center. Hex coordinate, optional sewerId, Rat/Cat occupancy.
 17. One Move allows one through Speed hexes; may stop early.
 18. Rocks and large crates block traversal. Rat/Cat entry requires and consumes both Actions, triggers combat and ends the Turn after resolution.
@@ -139,7 +139,7 @@ The full owner-supplied [Rulebook v1.1](RULEBOOK-v1.1.txt) is preserved verbatim
 
 - Milestones 1–2 complete, including owner combat corrections.
 - Milestone 3: Cat movement once per Turn, neutral three-dice attacks, shared combat, respawn, persistent Health helper, eliminated-player movement and Finish credit. Mixed seeded replay and Cat unit tests verify the implementation.
-- Milestone 4 complete: 19-hex seeded Arena and exterior Burrows, five-Round/early scoring, public bets, Arena 2 transition and modifiers, Match completion and Final Duel.
+- Milestone 4 complete: 19/37-hex seeded Arenas with ordered Burrow placement and mandatory exit, five-Round/early scoring, public bets, Arena 2 transition and modifiers, Match completion and Final Duel.
 - Milestones 5–8 remain as originally planned.
 
 Prototype Rat Attack stats now vary across 2, 3 and 4. They are test content, not the owner's final Rat designs.

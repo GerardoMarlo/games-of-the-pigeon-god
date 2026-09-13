@@ -10,8 +10,9 @@ export function beginTurn(state:GameState):void {
   if(state.finalDuel){grantActions(state);return;}
   phase(state,'CAT_MOVEMENT');
 }
-export function endTurn(state:GameState):void {
+export function endTurn(state:GameState,combatRetreat=false):void {
   const player=state.players[state.activePlayerId];
+  if(player.currentRat.alive&&player.currentRat.inBurrow&&!combatRetreat)throw new Error('Must exit Burrow before ending Turn');
   player.actionsRemaining=0;phase(state,'TURN_END');
   const index=state.turnOrder.indexOf(player.id);
   if(index===state.turnOrder.length-1){

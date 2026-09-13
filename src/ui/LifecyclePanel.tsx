@@ -2,6 +2,7 @@ import type { GameAction,GameState } from '../engine/types';
 interface Props {state:GameState;actions:GameAction[];send:(a:GameAction)=>void}
 export function LifecyclePanel({state,actions,send}:Props){
   return <section aria-label="Match progress">
+    {state.phase==='ARENA_SETUP'&&<p role="status">{state.activePlayerId.toUpperCase()}: select a highlighted Burrow location. Players place in Turn order. At least one entrance must be free of blocking terrain.</p>}
     {state.phase==='ARENA_END'&&<p role="status">Arena {state.arenaNumber} complete. {state.arenaWinnerId?`${state.arenaWinnerId.toUpperCase()} wins +2 Divine Favor.`:'No winner; no victory Favor.'}</p>}
     {state.phase==='BETWEEN_ARENAS'&&<p>Deploy the reserved Rats for Arena 2. Favor and Cat Health carry over; trackers and Fervor reset. Center grants Fervor after Cat movement, and Attack sixes cause two Hits.</p>}
     {state.phase==='FINAL_DUEL'&&<p>Favor is tied. Each tied player chooses either of their Rats for the Final Duel.</p>}

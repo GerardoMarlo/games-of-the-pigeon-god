@@ -1,0 +1,654 @@
+THE GAMES OF THE PIGEON GOD
+Rulebook v1.4 — Player-selected Burrows and mandatory departure
+Players: 2–4
+Recommended Age: 14+
+Estimated Playtime: 30 minutes
+Genre: Tactical arena combat, public objectives, risk management, and elimination
+
+1. OVERVIEW
+In The Games of the Pigeon God, each player controls a Rat Gladiator fighting for survival, glory, and the favor of the almighty Pigeon God.
+Players battle through 2 Arenas, earning Divine Favor by:
+Winning Arenas.
+Completing Decrees.
+Reaching combat milestones.
+Correctly betting on an Arena winner after being eliminated.
+Resolving special card effects.
+After the second Arena, the player with the most Divine Favor wins.
+
+2. COMPONENTS
+The game uses:
+Modular hexagonal Arena board.
+Rat Gladiator cards.
+Rat meeples.
+Cat meeple.
+Decree cards.
+Item cards.
+Divine Favor tokens.
+Health/Fervor tokens.
+Player boards.
+Attack trackers.
+Dodge trackers.
+Finish trackers.
+Action markers.
+Six-sided dice.
+Terrain elements, including:
+Rocks.
+Large crates.
+Sewers.
+Rat Burrows.
+
+3. DIVINE FAVOR
+Divine Favor represents prestige earned before the Pigeon God.
+It is the main victory resource.
+Divine Favor:
+Is never reset during the Match.
+Carries from Arena 1 into Arena 2.
+Determines the winner of the game.
+
+4. RAT GLADIATORS
+Each player uses a different Rat during each Arena.
+Every Rat has:
+Health
+Attack
+Speed
+A special ability, when applicable
+Attack
+Attack determines how many dice that individual Rat rolls when attacking.
+Attack 2 means roll exactly 2 Attack dice; Attack 4 means roll exactly 4. There is no universal three-dice rule for Rats.
+In Arena 1, every roll of 4, 5 or 6 is a successful Attack worth 1 Hit. A 4 is a Hit. The Cat always uses its own 3 Attack dice.
+Speed
+Speed determines:
+How many hexes the Rat may move with one Move Action.
+How many dice the Rat rolls when Dodging.
+A Rat may move up to its Speed.
+It is never required to use all available movement.
+Health
+Health represents how much damage a Rat can take.
+When a Rat reaches 0 Health, it is Finished and removed from the Arena.
+
+5. RAT DRAFT
+At the beginning of the Match, each player receives 3 Rat cards.
+Each player:
+Secretly chooses 1 Rat to keep.
+Passes the other 2 cards to the player on their right.
+Receives 2 cards from the player on their left.
+Chooses 1 of those Rats to keep.
+Discards the remaining Rat.
+Each player therefore finishes the draft with 2 secret Rats.
+Before Arena 1, each player secretly chooses which of those Rats will fight first.
+The other Rat is reserved for Arena 2.
+A Rat remains hidden from opponents until it enters play.
+
+6. STANDARD ARENA SETUP
+With 2 players, build a 19-hex radius-2 Arena. Each player selects an exterior Burrow adjacent to its perimeter. Exterior Burrows do not count toward the 19 Arena hexes.
+With 3 or 4 players, build a 37-hex radius-3 Arena. Each player selects a Burrow on an outermost-ring Arena hex. These Burrow hexes are included in the 37.
+Mark the center as the Cat spawn. Place two connected Sewers, one rock and one large crate. Locations may be randomized. The digital generator uses seeded radius-2 terrain locations, preserving clear center neighbors and connectivity.
+Determine Turn order before Burrow placement. Starting with the first player and continuing in Turn order, each player chooses a distinct legal Burrow location. No Turns or Cat rolls begin until everyone has placed.
+A Burrow must have at least one adjacent normal Arena entrance. Rock and crate cannot block all its entrances. One entrance may be blocked if another is clear. Burrows cannot occupy terrain obstacles, Sewers or another Burrow; placement cannot seal a previously placed Burrow's final entrance.
+For exterior Burrows, legal locations are grid-aligned hexes directly adjacent to the perimeter. A Rat may use any legal adjacent entrance, rather than one fixed assigned entrance.
+Each Rat begins in its own Burrow. Burrows remain one-way for both board sizes: after departure, Rats cannot enter, cross or be pushed into a Burrow. The Cat's ordinary movement treats a Burrow as blocked.
+Leaving costs one hex of movement; the Rat may use the remaining Speed in the same Move.
+A Rat must attempt departure on its first Turn and cannot voluntarily End Turn while in its Burrow. The same requirement applies on later Turns if it has not yet left.
+Keep the Cat roll at the beginning of the Turn. If the Cat occupies an entrance, the Rat may enter that hex to initiate combat, requiring and consuming both Actions as usual. If the Rat loses or ties that direct attack, it returns one hex to its own Burrow and its Turn ends; it must retry departure next Turn. This is the explicit exception to mandatory departure and one-way re-entry.
+An entrance occupied by another Rat remains unavailable under the earlier empty-entry ruling. An empty entrance is otherwise required.
+Shuffle the Decree deck and reveal four public Decrees. Shuffle the Item deck.
+Repeat Burrow selection on each new Arena layout, in that Arena's Turn order. Final Duels and restarted duels use the same setup according to the number of duelists.
+
+7. ARENA STRUCTURE
+Each Arena lasts a maximum of:
+5 Rounds.
+During every Round, each participating player receives one Turn.
+A living Rat normally has:
+2 Actions per Turn.
+An Arena may end before Round 5 if only one Rat remains alive.
+
+8. TURN STRUCTURE
+A living player's Turn follows this sequence:
+Move the Cat.
+Resolve any Cat combat.
+Gain Arena-specific start-of-Turn effects.
+Receive 2 Actions.
+Spend Actions.
+Resolve any combats immediately when triggered.
+Resolve completed Decrees.
+End Turn. A living Rat cannot voluntarily end its Turn in a Burrow; the failed direct Cat attack exception in section 6 still ends the Turn.
+An eliminated player still receives a Turn, but only to move the Cat.
+
+9. ACTIONS
+The main Actions are:
+Move
+Ask the Crowd for an Item
+Actions may be repeated during the same Turn as long as they remain legal.
+There is no separate basic Attack Action.
+Combat is triggered automatically when a Rat attempts to enter an occupied hex, and requires and consumes both Actions.
+
+10. MOVEMENT
+A Move Action allows a Rat to move up to its Speed in hexes.
+The Rat may stop early.
+A Rat cannot move through:
+Rocks.
+Large crates.
+Blocking terrain.
+Another Rat.
+The Cat.
+If the moving Rat attempts to enter a hex occupied by another Rat or the Cat, movement pauses and combat begins immediately.
+A Move that enters a Rat or Cat hex requires and consumes both Actions. Resolve combat and displacement, then automatically end the Rat's Turn. No unused movement can be continued. With only one Action remaining, combat cannot be initiated.
+
+11. HEX OCCUPANCY
+Two Rats may never finish a Turn on the same hex.
+Entering another Rat's hex triggers combat immediately.
+The same principle applies when entering the Cat's hex.
+Combat determines which figure keeps the contested position.
+
+12. RAT VS. RAT COMBAT
+The Rat entering the occupied hex is the Attacker.
+The Rat already occupying the hex is the Defender.
+Combat proceeds as follows:
+Attacker rolls Attack dice.
+Attacker may spend Fervor to reroll dice.
+Attacker confirms the Attack roll.
+Defender rolls Dodge dice.
+Defender may spend Fervor to reroll dice.
+Defender confirms the Dodge roll.
+Resolve Hits.
+Resolve Dodges.
+Resolve Counterattacks.
+Apply damage simultaneously.
+Check for Finishes.
+Determine combat winner.
+Resolve Pushback.
+The Defender does not make a normal attack.
+The Defender may only deal damage through Counterattacks.
+
+13. ATTACK ROLLS — ARENA 1
+For each Attack die:
+1–3: Miss
+4–6: 1 Hit
+Each uncancelled Hit deals:
+1 damage.
+Every point of damage successfully dealt increases the player's Attack Tracker by 1.
+
+14. DODGING
+The Defender rolls a number of Dodge dice equal to their Speed.
+For each Dodge die:
+1–4: Failure
+5: Cancel 1 Hit
+6: Cancel 1 Hit and deal 1 Counterattack damage
+Every result of 5 or 6 increases the player's Dodge Tracker by 1.
+
+15. COUNTERATTACKS
+Each natural 6 rolled while Dodging:
+Cancels 1 incoming Hit.
+Deals 1 damage to the Attacker.
+Counterattack damage counts as successful damage and therefore also increases the player's Attack Tracker.
+Multiple 6s may cause multiple Counterattack damage.
+
+16. COMBAT EXAMPLE
+The Attacker scores:
+3 Hits
+The Defender rolls:
+2, 5, 6
+The Defender therefore:
+Cancels 2 Hits.
+Receives 1 damage.
+Deals 1 Counterattack damage.
+Gains +2 on the Dodge Tracker.
+Gains +1 on the Attack Tracker for the Counterattack damage.
+Both Rats suffer 1 damage.
+Because the combat damage is tied, the Defender wins the combat.
+
+17. WINNING A COMBAT
+Compare the amount of damage dealt by each Rat during that combat.
+Attacker dealt more damage
+The Attacker wins.
+The Defender is pushed away.
+Defender dealt more damage
+The Defender wins.
+The Attacker returns to the hex from which it entered.
+Equal damage
+The Defender wins.
+The Attacker retreats.
+This includes a 0–0 result.
+The Attacker must therefore deal strictly more damage than the Defender to capture the occupied hex.
+
+18. PUSHBACK
+When the Defender loses, the combat winner chooses an adjacent legal and empty hex for the losing Rat.
+The destination must:
+Be inside the Arena.
+Not contain blocking terrain.
+Not contain another Rat.
+Not contain the Cat.
+If the losing defender has no legal adjacent empty hex, the living Rats switch positions: the attacker captures the contested hex and the defender takes the hex the attacker occupied immediately before combat. The winning attacker does not retreat.
+
+19. COMBAT ENDS THE TURN
+Entering a Rat or Cat hex costs both Actions. Once rolls, damage, Finishes and displacement are resolved, the Turn ends automatically. No additional Move or remaining-Speed continuation is allowed.
+If the attacker loses or ties, it retreats ONE HEX along its approach path to the hex occupied immediately before entering combat. It does not retrace the entire Move.
+If the Arena has ended, do not start another Turn.
+
+20. FINISHES
+When a Rat reaches 0 Health:
+It is immediately removed from the Arena.
+The character responsible for the final damage gains 1 Finish.
+Finish milestones:
+1 Finish: No bonus.
+2 Finishes: +1 Fervor.
+3 Finishes: +1 Divine Favor.
+Trackers reset when a new Arena begins.
+
+21. SIMULTANEOUS DEATH
+Attack and Counterattack damage are resolved as part of the same combat resolution.
+It is therefore possible for both Rats to reach 0 Health.
+If this occurs:
+Both Rats are removed.
+Each gains the appropriate Finish for eliminating the other.
+If they were the last surviving Rats:
+the Arena ends immediately with no winner.
+
+22. ATTACK TRACKER
+The Attack Tracker records damage successfully dealt, not Attack Actions.
+Each damage dealt gives:
++1 Attack
+This includes:
+Normal Attack damage.
+Counterattack damage.
+Milestones:
+4 Attacks: +1 Fervor
+5 Attacks: +1 Fervor
+Rewards are gained immediately.
+
+23. DODGE TRACKER
+Every successful Dodge result increases the Dodge Tracker by 1.
+Therefore:
+A 5 gives +1 Dodge.
+A 6 gives +1 Dodge and may also cause Counterattack damage.
+Milestones:
+4 Dodges: +1 Fervor
+5 Dodges: +1 Fervor
+Rewards are gained immediately.
+
+24. FERVOR
+Fervor represents a Rat's growing battle frenzy.
+Fervor may be gained through:
+Losing Health.
+Attack milestones.
+Dodge milestones.
+Finish milestones.
+Special abilities.
+Items.
+Arena effects.
+Whenever a Rat loses Health, the corresponding Health token may be flipped to its Fervor side.
+Spending Fervor
+Spend:
+1 Fervor
+to reroll:
+1 Attack or Dodge die.
+The same die may be rerolled multiple times as long as the player continues spending Fervor.
+However, roll phases are final.
+Once the Attacker confirms the Attack roll, those dice can no longer be changed.
+The Dodge phase then begins.
+Once the Defender confirms the Dodge roll, combat is resolved.
+
+25. THE CAT
+The Cat is a neutral creature roaming the Arena.
+The Cat has:
+9 Health
+and attacks with:
+3 Attack Dice.
+The Cat:
+Cannot Dodge.
+Can take Counterattack damage.
+Can be Finished by a Rat.
+Retains its remaining Health between Arenas if it survives.
+
+26. CAT MOVEMENT
+At the beginning of every player's Turn:
+That player rolls 1 six-sided die.
+Each number corresponds to one of the six hex directions.
+The Cat moves exactly 1 hex in that direction.
+The Cat therefore moves once per player Turn.
+
+27. CAT LEAVING THE ARENA
+If the Cat is on an edge hex and its movement would take it outside the Arena:
+the Cat immediately respawns at its spawn hex.
+In the standard Arena, the spawn hex is the center.
+
+28. CAT VS. RAT COMBAT
+If the Cat moves into a Rat's hex:
+The Cat becomes the Attacker.
+The Cat rolls its 3 Attack dice.
+Hits are resolved normally.
+The Rat rolls its normal Dodge dice.
+Dodge results of 6 may Counterattack and damage the Cat.
+If a Rat voluntarily moves into the Cat's hex:
+the Rat becomes the Attacker.
+Because the Cat cannot Dodge, the Rat's Attack Hits deal damage directly.
+
+29. CAT COMBAT WINNER
+When the Cat attacks a Rat, compare damage dealt during the combat just as in normal Rat combat.
+If the Cat wins:
+the Rat is pushed one hex along the direction in which the Cat entered.
+If that hex is illegal:
+the Cat retreats instead.
+If the Rat deals more damage through Counterattacks:
+the Rat wins and chooses a legal adjacent hex to push the Cat back to. A legal previous Cat hex may be chosen.
+A tied combat favors the Defender, as normal.
+
+30. FINISHING THE CAT
+If a Rat reduces the Cat to 0 Health:
+that Rat gains:
++1 Finish
+The Cat immediately respawns at its spawn hex.
+When the Cat respawns after being Finished, it returns with:
+9 Health.
+If the Cat survives an Arena without being Finished, its remaining Health carries into the next Arena.
+Example:
+Cat ends Arena 1 with 4 Health.
+Cat begins Arena 2 with 4 Health.
+
+31. ELIMINATED PLAYERS
+When a Rat is Finished:
+It is removed from the Arena.
+Its player no longer receives normal Actions.
+Its player continues participating through the Cat.
+On that player's Turn:
+Roll the Cat movement die.
+Resolve Cat movement.
+Resolve Cat combat if necessary.
+End the Turn.
+The Cat does not receive any extra movement because the player was eliminated.
+
+32. CAT FINISH REWARD FOR ELIMINATED PLAYERS
+If an eliminated player's Cat movement directly causes the Cat to Finish another Rat:
+the eliminated player gains:
++1 Divine Favor.
+
+33. BETTING AFTER ELIMINATION
+A player Finished during:
+Round 1,
+Round 2, or
+Round 3
+may publicly bet on which surviving Rat will win the Arena.
+The player places their marker at that player's Burrow or designated betting area.
+If the prediction is correct:
+gain +1 Divine Favor.
+Players eliminated during Rounds 4 or 5 cannot place a bet.
+
+34. SEWERS
+The standard Arena contains 2 connected Sewers.
+When a Rat enters one Sewer:
+It immediately teleports to the other Sewer.
+It must immediately exit onto a legal adjacent hex.
+It may never finish movement on the Sewer itself.
+Teleporting and exiting:
+Cost no additional Action.
+Consume no additional movement.
+Only the movement used to enter the Sewer counts against Speed.
+Example:
+A Speed 3 Rat spends 1 movement to enter a Sewer.
+It teleports and exits for free.
+It still has 2 movement remaining.
+
+35. DECREES OF THE PIGEON GOD
+Decrees are:
+Public.
+Shared.
+Available to all players.
+There are always up to:
+4 active Decrees
+visible in the Arena.
+When a player completes one:
+They immediately claim it.
+They receive its reward.
+The Decree is discarded.
+A replacement Decree is revealed.
+Only one player may claim each Decree.
+
+36. IMMEDIATE DECREES
+Some Decrees resolve immediately when their condition is reached.
+Examples include:
+Reach a certain number of Attacks.
+Reach a certain number of Dodges.
+Reach a certain number of Finishes.
+The first player to meet the requirement claims the Decree.
+The replacement becomes active immediately.
+
+37. END-OF-ARENA DECREES
+Some Decrees are evaluated only when the Arena ends.
+Examples include:
+Finish with the most Attacks.
+Finish with the most remaining Health.
+Finish with exactly 1 Health.
+Occupy a particular location.
+For comparative Decrees, a player must strictly outperform every other eligible player.
+If two or more players tie for the best result:
+nobody claims the Decree.
+No secondary tiebreaker is used.
+
+38. ITEMS
+Items provide temporary benefits.
+A Rat may have a maximum of:
+1 equipped Item.
+
+39. ASKING THE CROWD FOR AN ITEM
+A player may spend:
+1 Action
+to ask the crowd for an Item if:
+They do not already have an Item.
+They are not currently sharing a hex because of an unresolved Rat combat.
+They are not currently sharing a hex because of an unresolved Cat combat.
+The player then:
+Draws exactly 1 Item card.
+Must keep it.
+Equips it immediately.
+
+40. USING ITEMS
+Using an Item normally costs:
+0 Actions
+unless the card specifically states otherwise.
+Each Item card specifies when it may be used.
+Items are generally used during their owner's Turn, unless the card explicitly creates another timing window.
+When a consumable Item is used:
+discard it.
+All unused Items are discarded at the end of the Arena.
+
+41. EARLY END OF AN ARENA
+If only 1 Rat remains alive at any moment:
+the Arena ends immediately.
+That Rat automatically wins the Arena.
+If all remaining Rats are Finished simultaneously and nobody survives:
+the Arena ends with no winner.
+
+42. NORMAL END OF AN ARENA
+If two or more Rats remain alive after Round 5, determine the winner among living Rats only.
+Compare, in order:
+Most Finishes.
+Most Attacks.
+Most Dodges.
+Most remaining Health.
+The first criterion that breaks the tie determines the Arena winner. If all four criteria remain tied for first place, the Arena has no winner and awards no Arena victory Divine Favor.
+The Arena winner receives:
++2 Divine Favor.
+
+43. BETWEEN ARENAS
+After Arena 1:
+Keep:
+Divine Favor.
+The Cat's current Health.
+Discard or reset:
+Arena 1 Rat.
+Items.
+Fervor.
+Attack Tracker.
+Dodge Tracker.
+Finish Tracker.
+Elimination status.
+Bet.
+Remaining Actions.
+Each player then reveals and deploys their second drafted Rat for Arena 2.
+
+44. FIRST PLAYER
+Arena 1
+Determine the first player randomly.
+Play then continues clockwise.
+Arena 2
+The player with the least Divine Favor becomes first player.
+If multiple players are tied for least Divine Favor:
+the tied player who acted latest in the previous Arena's Turn order becomes first player.
+Play then continues clockwise.
+
+45. ARENA 2 — THE FINAL ARENA
+Arena 2 uses all normal rules, but adds two global special rules.
+These represent the Pigeon God's increasing desire for violence and spectacle.
+
+46. FAVOR OF THE CENTER
+At the beginning of a living player's Turn:
+if their Rat currently occupies the Arena's center hex:
+gain +1 Fervor.
+A Rat may gain this reward once each Round if it manages to maintain or recapture the center.
+
+47. BRUTAL ATTACKS
+During Arena 2, Attack dice become more dangerous.
+For Rats and the Cat:
+1–3: Miss
+4: 1 Hit
+5: 1 Hit
+6: 2 Hits
+Dodge rules remain unchanged.
+Therefore, a Dodge result of 6 still:
+Cancels only 1 Hit.
+Causes 1 Counterattack damage.
+
+48. END OF THE MATCH
+After Arena 2 ends:
+compare every player's total Divine Favor.
+The player with the most Divine Favor wins The Games of the Pigeon God.
+
+49. FINAL TIE — THE PIGEON GOD'S DUEL
+If two or more players are tied for the highest Divine Favor:
+they enter a Final Duel.
+Each tied player chooses either of the 2 Rats they used during the Match.
+All selected Rats place Burrows in Turn order on a new Final Duel layout: 19 hexes with exterior Burrows for two duelists, or 37 hexes with outer-ring Burrows for three or four. Each starts at its full printed Health. Reset Attack, Dodge and Finish trackers, Fervor, elimination state, bets and Actions. Divine Favor remains unchanged.
+The Duel continues until only:
+1 Rat remains alive.
+That player's Rat wins the Match.
+During the Final Duel:
+No Decrees are active.
+No betting occurs.
+No new Items are drawn.
+The Cat is not used.
+No Divine Favor is awarded.
+Use Arena 1 Attack dice rules: 4, 5 and 6 each cause one Hit. No Arena 2 center Fervor applies. Combat still requires both Actions and ends the Turn after displacement. There is no five-Round limit; keep playing until one Rat survives. Eliminated duelists are skipped.
+The last living Rat wins. If the last living Rats die simultaneously and none remain, restart the Final Duel at full Health with the same chosen Rats. No Divine Favor is awarded, including Finish milestones.
+
+50. QUICK ROUND SUMMARY
+Start of Turn
+Roll for Cat movement.
+Move Cat.
+Resolve Cat combat if triggered.
+Apply start-of-Turn Arena effects.
+Living player receives 2 Actions.
+Player Actions
+The player may:
+Move.
+Ask the Crowd for an Item.
+Use Items when permitted.
+During movement:
+Enter occupied hex → Combat begins immediately.
+Combat
+Roll Attack dice.
+Spend Fervor if desired.
+Confirm Attack.
+Roll Dodge dice.
+Spend Fervor if desired.
+Confirm Dodge.
+Resolve Hits.
+Resolve Counterattacks.
+Apply damage.
+Update Trackers.
+Resolve Finishes.
+Resolve Pushback.
+End the attacking Rat's Turn after displacement; no movement continuation is permitted.
+End of Turn
+Check immediate Decrees.
+Proceed to next player.
+After every player has taken a Turn:
+advance to the next Round.
+After Round 5, or as soon as only one Rat survives:
+resolve the Arena.
+
+51. QUICK COMBAT REFERENCE
+Arena 1 Attack
+Die
+Result
+1–3
+Miss
+4–6
+1 Hit
+
+Arena 2 Attack
+Die
+Result
+1–3
+Miss
+4–5
+1 Hit
+6
+2 Hits
+
+Dodge
+Die
+Result
+1–4
+Failure
+5
+Cancel 1 Hit
+6
+Cancel 1 Hit + 1 Counterattack
+
+Combat Winner
+Result
+Winner
+Attacker deals more damage
+Attacker
+Defender deals more damage
+Defender
+Same damage
+Defender
+
+
+52. QUICK MILESTONE REFERENCE
+Attacks
+4 → +1 Fervor
+5 → +1 Fervor
+Dodges
+4 → +1 Fervor
+5 → +1 Fervor
+Finishes
+2 → +1 Fervor
+3 → +1 Divine Favor
+Arena Victory
++2 Divine Favor
+Correct Elimination Bet
++1 Divine Favor
+Eliminated Player Causes Cat Finish
++1 Divine Favor
+Finish the Cat
++1 Finish
+
+53. GOLDEN RULE
+Whenever a card or Rat ability directly contradicts a general rule:
+the specific card or ability takes precedence.
+If two effects would occur at the same time, resolve the active player's effects first unless the effect itself specifies a different order.
+
+
+54. CAT CLARIFICATIONS FOR THE DIGITAL GAME
+At the beginning of every Turn, roll Cat movement once before granting a living player Actions. Cat-initiated combat at this point does not consume a living player's future Actions: resolve it first, then grant two Actions if that player survives. An eliminated player ends their Turn after this single Cat movement/combat sequence.
+A Cat movement blocked by a rock or large crate consumes the roll but leaves the Cat in place. Cat movement does not use Rat Sewer teleportation.
+Leaving the Arena respawns the Cat at its spawn while preserving remaining Health. Being Finished respawns it at 9 Health and grants the responsible Rat one Finish. Surviving Health, including post-respawn Health, carries into the next Arena.
+If the respawn hex is occupied by a Rat, resolve a Cat attack against that Rat. The Cat rolls three Attack dice and the Rat Dodges using Speed. The Cat has no prior approach direction when respawning: if the Cat wins, the active player chooses a legal adjacent pushback hex for the Rat; if the Cat loses or ties, the winning Rat's player chooses a legal adjacent hex for the Cat. The Cat may not overlap the Rat after resolution.
+When the Cat enters a Rat by ordinary movement and wins, push the Rat one hex in the Cat's movement direction. If that forward destination is illegal, the Cat retreats instead. If the Cat loses or ties, the winning Rat's player chooses legal Cat pushback.
+A Rat voluntarily entering the Cat's hex requires and spends both Actions. Its Attack stat determines its dice. The Cat never rolls Dodge dice. If the Rat wins and the Cat survives, the Rat's player chooses legal Cat pushback; if no legal hex exists, Rat and Cat swap positions. If the Rat loses or ties, it retreats one approach hex. This Rat-initiated combat ends the Rat's Turn after resolution, including any immediate respawn combat.
+Only a player who was already eliminated when rolling Cat movement gains one Divine Favor if that movement/combat causes the Cat to Finish another Rat. A living roller receives no such reward.
+
+55. DECREE REFERENCE FILTER
+The supplied Decree grid is reference content for the next content milestone. Exclude Decrees requiring separately tracked Dodges against the Cat, including Burla al gato. General Dodge Decrees remain eligible. Doma al gato, which rewards defeating the Cat, is retained. Do not add a separate Cat-Dodge tracker.

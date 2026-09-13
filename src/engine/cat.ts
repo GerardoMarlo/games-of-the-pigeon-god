@@ -1,3 +1,4 @@
+import { isBurrow } from './burrows';
 import { startCombat } from './combat';
 import { directions, equal, key } from './hex';
 import { occupant } from './movement';
@@ -28,9 +29,9 @@ export function moveCat(state:GameState):void {
   const to={q:from.q+direction.q,r:from.r+direction.r},tile=state.board.hexes[key(to)];
   const resume=state.players[state.activePlayerId].eliminated?'end_turn':'actions';
   const catCreditPlayerId=resume==='end_turn'?state.activePlayerId:undefined;
-  state.eventLog.push({type:'CAT_MOVED',die,from,to,blocked:!!tile&&['rock','crate'].includes(tile.terrain)});
+  state.eventLog.push({type:'CAT_MOVED',die,from,to,blocked:isBurrow(state,to)||!!tile&&['rock','crate'].includes(tile.terrain)});
   if(!tile){if(respawnCat(state,false,resume,false,catCreditPlayerId))return;}
-  else if(!['rock','crate'].includes(tile.terrain)){
+  else if(!isBurrow(state,to)&&!['rock','crate'].includes(tile.terrain)){
     const defenderId=occupant(state,to);
     if(defenderId && defenderId!=='cat'){startCombat(state,defenderId,from,to,{origin:'cat_turn',resume,direction,catCreditPlayerId});return;}
     state.cat.position=to;

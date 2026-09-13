@@ -1,3 +1,4 @@
+import { isBurrow } from './burrows';
 import { checkEliminationEnd } from './lifecycle';
 import { respawnCat } from './cat';
 import { endTurn, grantActions } from './turns';
@@ -61,14 +62,14 @@ function tracker(state:GameState,p:PlayerState,kind:'attacks'|'dodges'|'finishes
   if(!state.finalDuel&&kind==='finishes' && before<RULES.finishFavorMilestone && p.finishes>=RULES.finishFavorMilestone){p.divineFavor++;state.eventLog.push({type:'FAVOR_CHANGED',playerId:p.id,amount:1});}
 }
 function displace(state:GameState,playerId:string,to:HexCoordinate,reason:'pushback'|'retreat'|'capture'):void {
-  if(playerId==='cat'){state.cat.position={...to};state.cat.offBoard=false;}else state.players[playerId].currentRat.position={...to};state.eventLog.push({type:'DISPLACED',playerId,to:{...to},reason});
+  if(playerId==='cat'){state.cat.position={...to};state.cat.offBoard=false;}else {state.players[playerId].currentRat.position={...to};state.players[playerId].currentRat.inBurrow=isBurrow(state,to);}state.eventLog.push({type:'DISPLACED',playerId,to:{...to},reason});
 }
 function complete(state:GameState,c:CombatState):void {
   delete state.combat;
   const ended=checkEliminationEnd(state);
   if(!state.finalDuel&&!state.cat.alive && respawnCat(state,true,c.resume??'end_turn',ended,c.catCreditPlayerId))return;
   if(ended)return;
-  if(c.resume==='actions')grantActions(state);else endTurn(state);
+  if(c.resume==='actions')grantActions(state);else endTurn(state,c.origin==='rat_move'&&c.defenderId==='cat'&&isBurrow(state,c.sourceHex));
 }
 function health(state:GameState,id:string):number {return id==='cat'?state.cat.health:state.players[id].currentRat.health;}
 function alive(state:GameState,id:string):boolean {return id==='cat'?state.cat.alive:state.players[id].currentRat.alive;}

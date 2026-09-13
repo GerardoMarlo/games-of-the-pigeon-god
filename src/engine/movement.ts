@@ -1,3 +1,4 @@
+import { burrowEntrances,isBurrow } from './burrows';
 import { equal, key, neighbors, type HexCoordinate } from './hex';
 import type { GameState } from './types';
 export interface Step { to:HexCoordinate; cost:number; defenderId?:string }
@@ -7,7 +8,7 @@ export function occupant(state:GameState,h:HexCoordinate): string|undefined {
 }
 export function empty(state:GameState,h:HexCoordinate):boolean {
   const tile=state.board.hexes[key(h)];
-  return !!tile && !['rock','crate','sewer'].includes(tile.terrain) && !occupant(state,h);
+  return !!tile && !isBurrow(state,h) && !['rock','crate','sewer'].includes(tile.terrain) && !occupant(state,h);
 }
 // Sewer paths explicitly contain entrance, paired exit, and mandatory free exit.
 export function traceMovement(state:GameState,playerId:string,path:HexCoordinate[]):Step[] {
@@ -19,10 +20,9 @@ export function traceMovement(state:GameState,playerId:string,path:HexCoordinate
   const steps:Step[]=[];
   for(let i=0;i<path.length;i++) {
     const to=path[i],tile=state.board.hexes[key(to)];
-    if(!neighbors(current).some(h=>equal(h,to)) || !tile || ['rock','crate'].includes(tile.terrain)) throw new Error('Blocked or nonadjacent path');
+    if(!neighbors(current).some(h=>equal(h,to)) || !tile || ['rock','crate'].includes(tile.terrain)||isBurrow(state,to)) throw new Error('Blocked or nonadjacent path');
     if(i===0&&player.currentRat.inBurrow){
-      const entrance=state.board.burrows?.find(b=>equal(b.position,current))?.entry;
-      if(!entrance||!equal(to,entrance)||!empty(state,to))throw new Error('Burrow entry must be empty');
+      if(!burrowEntrances(state,current).some(h=>equal(h,to))||(!empty(state,to)&&occupant(state,to)!=='cat'))throw new Error('Burrow entry must be empty');
     }
     if(++spent>card.speed) throw new Error('Speed exceeded');
     if(tile.terrain==='sewer') {
@@ -50,9 +50,9 @@ export function movementPaths(state:GameState,playerId:string):HexCoordinate[][]
     const node=queue.shift()!;
     if(node.cost>=speed) continue;
     for(const to of neighbors(node.at)) {
-      if(node.cost===0&&p.currentRat.inBurrow){const entrance=state.board.burrows?.find(b=>equal(b.position,node.at))?.entry;if(!entrance||!equal(to,entrance)||!empty(state,to))continue;}
+      if(node.cost===0&&p.currentRat.inBurrow&&(!burrowEntrances(state,node.at).some(h=>equal(h,to))||(!empty(state,to)&&occupant(state,to)!=='cat')))continue;
       const tile=state.board.hexes[key(to)];
-      if(!tile || ['rock','crate'].includes(tile.terrain)) continue;
+      if(!tile || ['rock','crate'].includes(tile.terrain)||isBurrow(state,to)) continue;
       const extensions:HexCoordinate[][]=[];
       if(tile.terrain==='sewer') {
         const portals=Object.values(state.board.hexes).filter(t=>t.terrain==='sewer' && t.sewerId===tile.sewerId && !equal(t.coordinate,to));

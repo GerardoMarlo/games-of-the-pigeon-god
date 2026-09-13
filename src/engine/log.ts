@@ -1,6 +1,7 @@
 import type { GameEvent } from './types';
 export function describeEvent(e:GameEvent):string {
   switch(e.type){
+    case 'BURROW_PLACED':return `${e.playerId} placed a Burrow at (${e.position.q}, ${e.position.r}).`;
     case 'ARENA_STARTED':return `Arena ${e.arenaNumber} begins.`;
     case 'BET_PLACED':return `${e.playerId} bets on ${e.targetId}.`;
     case 'MATCH_ENDED':return `${e.winnerId} wins the Match.`;
