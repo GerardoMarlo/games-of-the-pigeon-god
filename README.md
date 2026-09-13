@@ -1,12 +1,16 @@
 # The Games of the Pigeon God
 
-Single-player tactical board game prototype based on the owner's Technical Game Specification v1.0 (original title: Los Juegos del Dios Palomo).
+Single-player tactical board game prototype. Original title: Los Juegos del Dios Palomo.
 
-## Milestone 1
+## Completed: Milestones 1 and 2
 
-React + strict TypeScript + Vite; independent deterministic rules engine; axial hex board; 2–4 gladiators; seeded clockwise first-player selection; Turns and five Rounds; movement validation; connected Sewers; combat handoff; Vitest regression tests; minimal manual movement UI.
+React + strict TypeScript + Vite, independent seeded engine, 2–4 Rats, axial movement and Sewers, Turns/Rounds, and full Rat-versus-Rat combat. All seats are manually controlled until AI in Milestone 6.
 
-Run with Node 22.12+ and pnpm:
+Combat includes Attack dice, Speed-based Dodge dice, counterattacks, explicit roll confirmation, repeatable Fervor rerolls, simultaneous damage, Health-loss Fervor, trackers and milestones, Finishes, elimination, legal winner-chosen pushback, retreat and remaining movement without another Action. Only one or zero survivors ends the Arena immediately; scoring remains Milestone 4.
+
+## Run
+
+Use Node 22.12+ and pnpm:
 
 ```sh
 pnpm install
@@ -15,18 +19,22 @@ pnpm build
 pnpm dev
 ```
 
-Open the local URL printed by Vite. Set a seed and seat count, start a prototype, and click an outlined hex. Each move spends one Action. End Turn advances to the next seat. The prototype lets you control all seats manually; AI is Milestone 6. Entering an occupied hex stops at COMBAT, preserving source and unused movement for Milestone 2. Start a new prototype after testing this boundary. Round 5 ends at ARENA_END without scoring.
+Open the local Vite URL. Set a seed and 2–4 gladiators. Click an outlined hex to move. Enter another Rat's hex to fight; confirm Attack, operate the defender's Dodge controls, then confirm Dodge. Enabled dice can be rerolled for one Fervor. When prompted, the attacker chooses an outlined pushback hex. Continue unused movement for free, or select Stop movement to begin another Action. End Turn advances the seat.
 
-## Rule authority and milestone boundaries
+With seed 12345 and two gladiators, P1 can reach P2 using the Sewers on its first Move: click P2 to try combat immediately.
 
-The owner's supplied **Technical Game Specification v1.0, sections 1–101** is authoritative. The durable rule reference is [docs/SPECIFICATION.md](docs/SPECIFICATION.md). Decisions and open questions are in [docs/DECISIONS.md](docs/DECISIONS.md). No rule may be inferred from UI behavior.
+## Rule authority
 
-Placeholder Rats are assigned, not drafted. Cat is a stationary collision target. Combat resolution, scoring, a second Arena, Items, Decrees, abilities, AI, save/resume and polished artwork are deliberately not implemented in this milestone.
+- [Technical specification reference](docs/SPECIFICATION.md): condensed version of the owner's original technical specification v1.0; authoritative architecture and milestone plan.
+- [Full rulebook v1.1](docs/RULEBOOK-v1.1.txt): exact supplied text, including Speed-based Dodge dice and Fervor from lost Health.
+- [Reconciliation and decisions](docs/DECISIONS.md): interpretations, prototype boundaries and unresolved questions. Do not silently invent rules.
 
-## Architecture
+## Boundaries
 
-UI → controller → pure engine reducers → serializable GameState. `getLegalActions` supplies UI choices; `dispatch` independently validates paths, including valid paths other than the canonical shortest paths shown by the UI. `simulate` never mutates its input. Opponent views exclude unrevealed Rat cards and RNG state. All RNG uses one serializable seeded implementation. Events describe movement and phase transitions.
+Rats and radius-3 board are labeled test fixtures, not final content. The rulebook's standard radius-2 board with Burrows is recorded for the setup update. Draft, Burrows, Cat behavior, Arena scoring/transitions, Items, Decrees, abilities, AI and save/resume are not implemented here. Entering the Cat still pauses at the Milestone 3 boundary. Reset the prototype to resume.
 
-Content in `src/content/prototype.ts` is replaceable test data. Rat and Cat occupancy are derived from entity positions rather than duplicated in board hexes. Combat records attempted entry without overlapping entities.
+## Architecture and verification
 
-Tests cover RNG replay, 2–4 players, turns/rounds, blockers, occupied destinations, sewer costs/exits, immutable dispatch, visibility restrictions, and generated-action validation across 100 seeds for every seat count. The specification's 1,000 complete AI Matches test belongs to Milestone 6 onward.
+UI → controller → engine reducers → serializable state. Engine generates and revalidates legal actions. Defender decisions use the defender's identity without changing Turn ownership. `dispatch` and `simulate` clone inputs; public views exclude hidden reserve Rats and RNG. Combat and movement remain outside React. Event log describes rolls, damage, rewards, Finishes and displacement.
+
+Tests cover the original movement suite plus combat outcomes, confirmation locks, reroll ownership/cost, threshold crossing, simultaneous Finishes, overkill, legal pushback, continuation and deterministic replay across 200 combat seeds. CI runs tests and builds on pushes. The 1,000 complete AI Matches requirement belongs to later milestones.

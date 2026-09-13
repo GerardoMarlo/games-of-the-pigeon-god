@@ -12,7 +12,7 @@ export function empty(state:GameState,h:HexCoordinate):boolean {
 // Sewer paths explicitly contain entrance, paired exit, and mandatory free exit.
 export function traceMovement(state:GameState,playerId:string,path:HexCoordinate[]):Step[] {
   const player=state.players[playerId];
-  if(!player || state.phase!=='PLAYER_ACTION' || state.activePlayerId!==playerId || player.eliminated || !player.currentRat.alive || player.actionsRemaining<1) throw new Error('Move unavailable');
+  if(!player || state.phase!=='PLAYER_ACTION' || state.activePlayerId!==playerId || player.eliminated || !player.currentRat.alive || (!state.movement && player.actionsRemaining<1)) throw new Error('Move unavailable');
   const card=player.draftedRats.find(r=>r.id===player.currentRat.ratId);
   if(!card || !path.length) throw new Error('Empty path or missing Rat');
   let current=player.currentRat.position, spent=0;
@@ -20,7 +20,7 @@ export function traceMovement(state:GameState,playerId:string,path:HexCoordinate
   for(let i=0;i<path.length;i++) {
     const to=path[i],tile=state.board.hexes[key(to)];
     if(!neighbors(current).some(h=>equal(h,to)) || !tile || ['rock','crate'].includes(tile.terrain)) throw new Error('Blocked or nonadjacent path');
-    if(++spent>card.speed) throw new Error('Speed exceeded');
+    if(++spent>(state.movement?.remaining??card.speed)) throw new Error('Speed exceeded');
     if(tile.terrain==='sewer') {
       const paired=Object.values(state.board.hexes).filter(t=>t.terrain==='sewer' && t.sewerId===tile.sewerId && !equal(t.coordinate,to));
       const portal=path[++i],exit=path[++i];
@@ -37,8 +37,8 @@ export function traceMovement(state:GameState,playerId:string,path:HexCoordinate
 // Return one shortest legal path per destination; callers may submit other valid paths.
 export function movementPaths(state:GameState,playerId:string):HexCoordinate[][] {
   const p=state.players[playerId];
-  if(!p || state.phase!=='PLAYER_ACTION' || state.activePlayerId!==playerId || p.eliminated || !p.currentRat.alive || p.actionsRemaining<1) return [];
-  const speed=p.draftedRats.find(r=>r.id===p.currentRat.ratId)?.speed ?? 0;
+  if(!p || state.phase!=='PLAYER_ACTION' || state.activePlayerId!==playerId || p.eliminated || !p.currentRat.alive || (!state.movement && p.actionsRemaining<1)) return [];
+  const speed=state.movement?.remaining??p.draftedRats.find(r=>r.id===p.currentRat.ratId)?.speed??0;
   const queue=[{at:p.currentRat.position,path:[] as HexCoordinate[],cost:0}];
   const seen=new Set([key(p.currentRat.position)]), results:HexCoordinate[][]=[];
   while(queue.length) {

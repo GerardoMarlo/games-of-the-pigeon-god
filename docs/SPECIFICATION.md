@@ -2,6 +2,10 @@
 
 Original title: Los Juegos del Dios Palomo. Source: owner's specification supplied September 12, 2026 in the project task. This durable reference transcribes the requirements in condensed form, retaining section numbers. The original supplied document takes precedence if wording differs. Prototype decisions do not amend these rules.
 
+## Rulebook clarification received for Milestone 2
+
+The full owner-supplied [Rulebook v1.1](RULEBOOK-v1.1.txt) is preserved verbatim. Its §§4/14 establish Speed as the Dodge dice count; §24 adds Fervor from lost Health. Consult [DECISIONS.md](DECISIONS.md) for reconciliation and explicitly isolated prototype interpretations. The technical milestone sequence remains unchanged.
+
 ## Product and architecture (§§1–8)
 1. Primary reference. Prioritize rule correctness, deterministic state, logic/UI separation, testability, equal AI rules and expansion.
 2. Browser single-player versus AI: one human, 1–3 AI, 2–4 gladiators, two Arenas, local save/resume, difficulties, modular Arenas, combat, Decrees, Items, neutral Cat, final duel. Approximately 30 minutes.
