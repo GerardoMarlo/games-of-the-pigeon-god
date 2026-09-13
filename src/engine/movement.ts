@@ -3,7 +3,7 @@ import type { GameState } from './types';
 export interface Step { to:HexCoordinate; cost:number; defenderId?:string }
 export function occupant(state:GameState,h:HexCoordinate): string|undefined {
   if(state.cat.alive && !state.cat.offBoard && equal(state.cat.position,h)) return 'cat';
-  return Object.values(state.players).find(p=>p.currentRat.alive && equal(p.currentRat.position,h))?.id;
+  return Object.values(state.players).find(p=>p.currentRat.alive && !p.currentRat.inBurrow && equal(p.currentRat.position,h))?.id;
 }
 export function empty(state:GameState,h:HexCoordinate):boolean {
   const tile=state.board.hexes[key(h)];
@@ -20,6 +20,10 @@ export function traceMovement(state:GameState,playerId:string,path:HexCoordinate
   for(let i=0;i<path.length;i++) {
     const to=path[i],tile=state.board.hexes[key(to)];
     if(!neighbors(current).some(h=>equal(h,to)) || !tile || ['rock','crate'].includes(tile.terrain)) throw new Error('Blocked or nonadjacent path');
+    if(i===0&&player.currentRat.inBurrow){
+      const entrance=state.board.burrows?.find(b=>equal(b.position,current))?.entry;
+      if(!entrance||!equal(to,entrance)||!empty(state,to))throw new Error('Burrow entry must be empty');
+    }
     if(++spent>card.speed) throw new Error('Speed exceeded');
     if(tile.terrain==='sewer') {
       const paired=Object.values(state.board.hexes).filter(t=>t.terrain==='sewer' && t.sewerId===tile.sewerId && !equal(t.coordinate,to));
@@ -46,6 +50,7 @@ export function movementPaths(state:GameState,playerId:string):HexCoordinate[][]
     const node=queue.shift()!;
     if(node.cost>=speed) continue;
     for(const to of neighbors(node.at)) {
+      if(node.cost===0&&p.currentRat.inBurrow){const entrance=state.board.burrows?.find(b=>equal(b.position,node.at))?.entry;if(!entrance||!equal(to,entrance)||!empty(state,to))continue;}
       const tile=state.board.hexes[key(to)];
       if(!tile || ['rock','crate'].includes(tile.terrain)) continue;
       const extensions:HexCoordinate[][]=[];

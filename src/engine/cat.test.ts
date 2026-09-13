@@ -1,3 +1,4 @@
+import { legacyBoard } from '../tests/fixtures';
 import { describe,expect,it } from 'vitest';
 import { createGame,dispatch,getLegalActions,assertInvariants } from './game';
 import { carryCatToArena,respawnCat } from './cat';
@@ -5,7 +6,7 @@ import { attackHits,combatActor,startCombat } from './combat';
 import { directions,key } from './hex';
 import { rollD6,seeded } from './rng';
 import type { GameState } from './types';
-function fixture():GameState {return createGame({seed:12345,playerCount:3});}
+function fixture():GameState {return createGame({board:legacyBoard(),seed:12345,playerCount:3});}
 function forceDirection(s:GameState,die:number):void {for(let seed=0;;seed++){const rng=seeded(seed);if(rollD6(rng)===die){s.rng=seeded(seed);return;}}}
 function catFight(s=fixture()):GameState {
   s.players.p2.currentRat.position={q:1,r:0};forceDirection(s,1);
@@ -48,7 +49,7 @@ describe('respawn and persistence',()=>{
 describe('integrated seeded legality',()=>{
   it('replays 100 sequences of Cat and Rat actions without missing decisions',()=>{
     for(let seed=0;seed<100;seed++){
-      let s=createGame({seed,playerCount:4});
+      let s=createGame({board:legacyBoard(),seed,playerCount:4});
       for(let step=0;step<60&&s.phase!=='ARENA_END';step++){
         const actions=getLegalActions(s,combatActor(s));expect(actions.length).toBeGreaterThan(0);
         const action=actions[seed%actions.length];const before=structuredClone(s);

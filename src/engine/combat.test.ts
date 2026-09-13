@@ -1,3 +1,4 @@
+import { legacyBoard } from '../tests/fixtures';
 import { describe, expect, it } from 'vitest';
 import { attackHits, combatActor, pushbackHexes, rollResult } from './combat';
 import { assertInvariants, createGame, dispatch, getLegalActions, getVisibleState } from './game';
@@ -5,7 +6,7 @@ import { neighbors, key } from './hex';
 import type { GameState } from './types';
 
 function fixture(count:2|3|4=3):GameState {
-  const s=createGame({seed:12345,playerCount:count});
+  const s=createGame({board:legacyBoard(),seed:12345,playerCount:count});
   s.phase='PLAYER_ACTION';s.activePlayerId='p1';s.players.p1.actionsRemaining=2;for(const p of Object.values(s.players))p.draftedRats[0].attackDice=3;
   s.players.p1.currentRat.position={q:-2,r:0};s.players.p2.currentRat.position={q:-2,r:-1};
   return s;
@@ -35,9 +36,9 @@ describe('Fervor and confirmation (§§24–28; rulebook §24)',()=>{
 });
 describe('death and Finish (§§26,32–33)',()=>{
   it('both die simultaneously and both receive Finish credits',()=>{const f=fixture(2);f.players.p1.currentRat.health=1;f.players.p2.currentRat.health=1;f.players.p1.finishes=1;f.players.p2.finishes=2;const s=resolve([4,5,6],[2,5,6],f);expect(s.phase).toBe('ARENA_END');expect(s.arenaWinnerId).toBeUndefined();expect(s.players.p1.finishes).toBe(2);expect(s.players.p2.finishes).toBe(3);expect(s.players.p1.fervor).toBe(2);expect(s.players.p2.divineFavor).toBe(1);for(const p of Object.values(s.players)){expect(p.eliminated).toBe(true);expect(p.currentRat.alive).toBe(false);expect(p.actionsRemaining).toBe(0);}assertInvariants(s);});
-  it('one survivor immediately stops the Arena',()=>{const f=fixture(2);f.players.p2.currentRat.health=1;const s=resolve([4,4,4],[1,1,1],f);expect(s.phase).toBe('ARENA_END');expect(s.arenaWinnerId).toBe('p1');expect(s.players.p1.finishes).toBe(1);expect(s.players.p1.divineFavor).toBe(0);expect(getLegalActions(s,'p1')).toEqual([]);});
+  it('one survivor immediately stops the Arena',()=>{const f=fixture(2);f.players.p2.currentRat.health=1;const s=resolve([4,4,4],[1,1,1],f);expect(s.phase).toBe('ARENA_END');expect(s.arenaWinnerId).toBe('p1');expect(s.players.p1.finishes).toBe(1);expect(s.players.p1.divineFavor).toBe(2);expect(getLegalActions(s,'p1')).toEqual([{type:'CONTINUE_ARENA',playerId:'p1'}]);});
   it('caps overkill damage, Attack credit and Health-loss Fervor',()=>{const f=fixture();f.players.p2.currentRat.health=1;const s=resolve([4,4,4],[1,1,1],f);expect(s.players.p1.attacks).toBe(1);expect(s.players.p2.fervor).toBe(1);expect(s.players.p2.currentRat.health).toBe(0);});
-  it('dead attacker cannot continue and survivor keeps position',()=>{const f=fixture();f.players.p1.currentRat.health=1;const s=resolve([1,1,1],[6,1,1],f);expect(s.players.p2.finishes).toBe(1);expect(getLegalActions(s,'p1')).toEqual([]);expect(s.activePlayerId).toBe('p2');});
+  it('dead attacker cannot continue and survivor keeps position',()=>{const f=fixture();f.players.p1.currentRat.health=1;const s=resolve([1,1,1],[6,1,1],f);expect(s.players.p2.finishes).toBe(1);expect(getLegalActions(s,'p1').every(a=>a.type==='SELECT_BET')).toBe(true);expect(s.activePlayerId).toBe('p2');});
 });
 describe('corrected pushback and combat Turn completion',()=>{
   it('combat uses both Actions immediately and a tie ends the Turn',()=>{const c=attack();expect(c.players.p1.actionsRemaining).toBe(0);const s=resolve([1,1,1],[1,1,1]);expect(s.activePlayerId).toBe('p2');expect(s.players.p1.actionsRemaining).toBe(0);expect(s.players.p2.actionsRemaining).toBe(0);expect(getLegalActions(s,'p1')).toEqual([]);expect(()=>dispatch(s,{type:'MOVE',playerId:'p1',path:[{q:-3,r:0}]})).toThrow();});
@@ -45,7 +46,7 @@ describe('corrected pushback and combat Turn completion',()=>{
   it('retreats just one hex on a multi-step approach, not to Move origin',()=>{const f=fixture();f.players.p1.currentRat.position={q:-3,r:1};let s=dispatch(f,{type:'MOVE',playerId:'p1',path:[{q:-3,r:0},{q:-2,r:0},{q:-2,r:-1}]});s.combat!.attackerRoll=[1,1,1];s=dispatch(s,{type:'CONFIRM_ATTACK',playerId:'p1'});s.combat!.defenderRoll=[1,1,1];s=dispatch(s,{type:'CONFIRM_DODGE',playerId:'p2'});expect(s.players.p1.currentRat.position).toEqual({q:-2,r:0});expect(s.activePlayerId).toBe('p2');});
   it('holds Turn ownership until winner selects pushback',()=>{const s=resolve([4,4,4],[1,1,1]);expect(s.activePlayerId).toBe('p1');expect(s.players.p1.actionsRemaining).toBe(0);expect(()=>dispatch(s,{type:'END_TURN',playerId:'p1'})).toThrow();const next=dispatch(s,getLegalActions(s,'p1')[0]);expect(next.activePlayerId).toBe('p2');expect(next.eventLog.filter(e=>e.type==='PHASE_CHANGED'&&e.phase==='TURN_END')).toHaveLength(1);});
   it('combat on the last seat advances the Round only once',()=>{const f=fixture();f.turnOrder=['p2','p3','p1'];const s=resolve([1,1,1],[1,1,1],f);expect(s.roundNumber).toBe(2);expect(s.activePlayerId).toBe('p2');});
-  it('last-seat combat in Round five ends the Arena',()=>{const f=fixture();f.turnOrder=['p2','p3','p1'];f.roundNumber=5;const s=resolve([1,1,1],[1,1,1],f);expect(s.phase).toBe('ARENA_END');expect(s.roundNumber).toBe(5);expect(getLegalActions(s,'p1')).toEqual([]);});
+  it('last-seat combat in Round five ends the Arena',()=>{const f=fixture();f.turnOrder=['p2','p3','p1'];f.roundNumber=5;const s=resolve([1,1,1],[1,1,1],f);expect(s.phase).toBe('ARENA_END');expect(s.roundNumber).toBe(5);expect(getLegalActions(s,'p1')).toEqual([{type:'CONTINUE_ARENA',playerId:'p1'}]);});
   it('winner selects a legal hex and occupies the contested hex',()=>{let s=resolve([4,4,4],[1,1,1]);expect(s.combat?.stage).toBe('PUSHBACK');expect(getLegalActions(s,'p2')).toEqual([]);const action=getLegalActions(s,'p1')[0];expect(action.type).toBe('SELECT_PUSHBACK');s=dispatch(s,action);expect(s.players.p1.currentRat.position).toEqual({q:-2,r:-1});expect(s.activePlayerId).toBe('p2');expect(s.players.p1.actionsRemaining).toBe(0);assertInvariants(s);});
   it('rejects occupied, blocked, distant, sewer and outside pushback',()=>{const s=resolve([4,4,4],[1,1,1]);for(const destination of [{q:-2,r:0},{q:0,r:0},{q:-1,r:0},{q:-2,r:1},{q:-4,r:0}])expect(()=>dispatch(s,{type:'SELECT_PUSHBACK',playerId:'p1',destination})).toThrow();});
   it('Rats swap when winning attacker has no legal pushback hex',()=>{const f=fixture();for(const h of neighbors(f.players.p2.currentRat.position)){const tile=f.board.hexes[key(h)];if(tile&&key(h)!==key(f.players.p1.currentRat.position))tile.terrain='rock';}const s=resolve([4,4,4],[1,1,1],f);expect(s.combat).toBeUndefined();expect(s.players.p1.currentRat.position).toEqual({q:-2,r:-1});expect(s.players.p2.currentRat.position).toEqual({q:-2,r:0});expect(s.activePlayerId).toBe('p2');});

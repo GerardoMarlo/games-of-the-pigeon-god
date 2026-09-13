@@ -1,6 +1,10 @@
 import type { GameEvent } from './types';
 export function describeEvent(e:GameEvent):string {
   switch(e.type){
+    case 'ARENA_STARTED':return `Arena ${e.arenaNumber} begins.`;
+    case 'BET_PLACED':return `${e.playerId} bets on ${e.targetId}.`;
+    case 'MATCH_ENDED':return `${e.winnerId} wins the Match.`;
+    case 'DUEL_STARTED':return `Final Duel begins (attempt ${e.attempt}).`;
     case 'CAT_MOVED':return `Cat movement die ${e.die}: ${e.blocked?'blocked; stays put':`toward (${e.to.q}, ${e.to.r})`}.`;
     case 'CAT_RESPAWNED':return `Cat respawns with ${e.health} Health${e.occupied?'; spawn occupied: combat':''}.`;
     case 'CAT_FINISHED':return `${e.sourceId} Finished the Cat.`;
@@ -17,6 +21,6 @@ export function describeEvent(e:GameEvent):string {
     case 'RAT_FINISHED':return `${e.sourceId} Finished ${e.playerId}.`;
     case 'COMBAT_RESOLVED':return `${e.winnerId} wins combat (${e.attackerDamage} attack damage / ${e.defenderDamage} counter damage).`;
     case 'DISPLACED':return `${e.playerId}: ${e.reason} to (${e.to.q}, ${e.to.r}).`;
-    case 'ARENA_ENDED':return e.winnerId?`Arena ends: ${e.winnerId} is the sole survivor. Scoring is deferred.`:'Arena ends with no survivor and no winner.';
+    case 'ARENA_ENDED':return e.winnerId?`Arena ends: ${e.winnerId} wins the Arena and gains 2 Divine Favor.`:'Arena ends without a winner.';
   }
 }

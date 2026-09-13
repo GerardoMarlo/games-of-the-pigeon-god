@@ -1,3 +1,4 @@
+import { checkEliminationEnd } from './lifecycle';
 import { respawnCat } from './cat';
 import { endTurn, grantActions } from './turns';
 import { equal, neighbors, type HexCoordinate } from './hex';
@@ -57,21 +58,15 @@ function tracker(state:GameState,p:PlayerState,kind:'attacks'|'dodges'|'finishes
   const before=p[kind];p[kind]+=amount;state.eventLog.push({type:'TRACKER_CHANGED',playerId:p.id,tracker:kind,amount});
   const milestones=kind==='attacks'?RULES.attackFervorMilestones:kind==='dodges'?RULES.dodgeFervorMilestones:[RULES.finishFervorMilestone];
   for(const threshold of milestones)if(before<threshold && p[kind]>=threshold)fervor(state,p,1,`${kind} milestone ${threshold}`);
-  if(kind==='finishes' && before<RULES.finishFavorMilestone && p.finishes>=RULES.finishFavorMilestone){p.divineFavor++;state.eventLog.push({type:'FAVOR_CHANGED',playerId:p.id,amount:1});}
+  if(!state.finalDuel&&kind==='finishes' && before<RULES.finishFavorMilestone && p.finishes>=RULES.finishFavorMilestone){p.divineFavor++;state.eventLog.push({type:'FAVOR_CHANGED',playerId:p.id,amount:1});}
 }
 function displace(state:GameState,playerId:string,to:HexCoordinate,reason:'pushback'|'retreat'|'capture'):void {
   if(playerId==='cat'){state.cat.position={...to};state.cat.offBoard=false;}else state.players[playerId].currentRat.position={...to};state.eventLog.push({type:'DISPLACED',playerId,to:{...to},reason});
 }
-function arenaEnded(state:GameState):boolean {
-  const living=Object.values(state.players).filter(p=>p.currentRat.alive);
-  if(living.length>1)return false;
-  state.phase='ARENA_END';state.arenaWinnerId=living[0]?.id;
-  state.eventLog.push({type:'ARENA_ENDED',winnerId:living[0]?.id},{type:'PHASE_CHANGED',phase:'ARENA_END'});return true;
-}
 function complete(state:GameState,c:CombatState):void {
   delete state.combat;
-  const ended=arenaEnded(state);
-  if(!state.cat.alive && respawnCat(state,true,c.resume??'end_turn',ended,c.catCreditPlayerId))return;
+  const ended=checkEliminationEnd(state);
+  if(!state.finalDuel&&!state.cat.alive && respawnCat(state,true,c.resume??'end_turn',ended,c.catCreditPlayerId))return;
   if(ended)return;
   if(c.resume==='actions')grantActions(state);else endTurn(state);
 }
@@ -95,7 +90,7 @@ function finish(state:GameState,victimId:string,killerId:string):void {
   }
 }
 function resolve(state:GameState,c:CombatState):void {
-  const result=rollResult(c.attackerRoll,c.defenderRoll,state.arenaNumber);
+  const result=rollResult(c.attackerRoll,c.defenderRoll,state.finalDuel?1:state.arenaNumber);
   c.attackerDamage=RULES.capDamageToHealth?Math.min(health(state,c.defenderId),result.incoming):result.incoming;
   c.defenderDamage=RULES.capDamageToHealth?Math.min(health(state,c.attackerId),result.counter):result.counter;
   // Both values are computed before either participant loses Health.
