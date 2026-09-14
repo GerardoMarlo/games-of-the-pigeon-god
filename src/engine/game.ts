@@ -64,6 +64,7 @@ export function getLegalActions(state:GameState,playerId:string):GameAction[] {
   const extra=lifecycleActions(state,playerId);
   if(extra.length&&extra[0].type!=='SELECT_BET')return extra;
   if(state.phase==='CAT_MOVEMENT'){
+    if(state.players[state.activePlayerId].eliminated&&!state.content?.catStep)return playerId===state.activePlayerId?Array.from({length:6},(_,i)=>({type:'CHOOSE_CAT_DIRECTION' as const,playerId,direction:i+1})):[];
     const type=state.content?.catStep==='rolled'?'CONFIRM_CAT_DIRECTION':state.content?.catStep==='after'?'FINISH_CAT_MOVEMENT':'ROLL_CAT_MOVEMENT';
     return [...(playerId===state.activePlayerId?[{type,playerId} as GameAction]:[]),...extra,...items];
   }
@@ -75,6 +76,11 @@ export function getLegalActions(state:GameState,playerId:string):GameAction[] {
 }
 function dispatchRaw(input:GameState,action:GameAction):GameState {
   const bettor=pendingBettor(input);if(bettor&&(action.type!=='SELECT_BET'||action.playerId!==bettor))throw new Error('Place the pending bet before continuing');
+  if(action.type==='CHOOSE_CAT_DIRECTION'){
+    const direction=action.direction;
+    if(!getLegalActions(input,action.playerId).some(a=>a.type==='CHOOSE_CAT_DIRECTION'&&a.direction===direction))throw new Error('Illegal Cat direction');
+    const state=structuredClone(input);moveCat(state,action.direction);assertInvariants(state);return state;
+  }
   action=structuredClone(action);
   const state=structuredClone(input);
   if(action.type==='REQUEST_ITEM'||action.type==='USE_ITEM'){applyItem(state,action);assertInvariants(state);return state;}

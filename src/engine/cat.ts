@@ -29,13 +29,13 @@ export function finishCatStep(state:GameState):void {
   if(state.content){state.content.catStep='after';state.phase='CAT_MOVEMENT';return;}
   if(state.players[state.activePlayerId].eliminated)endTurn(state);else grantActions(state);
 }
-export function moveCat(state:GameState):void {
-  if(state.content&&!state.content.catStep&&!state.content.catItemMovement){state.content.catDie=rollD6(state.rng);state.content.catRolled=true;state.content.catStep='rolled';state.eventLog.push({type:'CONTENT',message:`Cat direction rolled: ${state.content.catDie}.`});return;}
-  const die=state.content?.catDie??rollD6(state.rng),direction=directions[die-1],from={...state.cat.position};
+export function moveCat(state:GameState,chosenDirection?:number):void {
+  if(chosenDirection===undefined&&state.content&&!state.content.catStep&&!state.content.catItemMovement){state.content.catDie=rollD6(state.rng);state.content.catRolled=true;state.content.catStep='rolled';state.eventLog.push({type:'CONTENT',message:`Cat direction rolled: ${state.content.catDie}.`});return;}
+  const die=chosenDirection??state.content?.catDie??rollD6(state.rng),direction=directions[die-1],from={...state.cat.position};
   const to={q:from.q+direction.q,r:from.r+direction.r},tile=state.board.hexes[key(to)];
   const resume=state.players[state.activePlayerId].eliminated?'end_turn':'actions';
   const catCreditPlayerId=resume==='end_turn'?state.activePlayerId:undefined;
-  state.eventLog.push({type:'CAT_MOVED',die,from,to,blocked:isBurrow(state,to)||!!tile&&['rock','crate'].includes(tile.terrain)});
+  state.eventLog.push({type:'CAT_MOVED',...(chosenDirection!==undefined?{chosenBy:state.activePlayerId}:{}),die,from,to,blocked:isBurrow(state,to)||!!tile&&['rock','crate'].includes(tile.terrain)});
   if(!tile){if(respawnCat(state,false,resume,false,catCreditPlayerId))return;}
   else if(!isBurrow(state,to)&&!['rock','crate'].includes(tile.terrain)){
     const defenderId=occupant(state,to);

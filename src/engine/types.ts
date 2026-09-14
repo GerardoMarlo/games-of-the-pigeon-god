@@ -21,7 +21,7 @@ export type GameEvent = {type:'COMBAT_MATH';arena:1|2;hits:number;canceled:numbe
   | {type:'RAT_FINISHED';playerId:string;sourceId:string}
   | {type:'COMBAT_RESOLVED';attackerDamage:number;defenderDamage:number;winnerId:string}
   | {type:'DISPLACED';playerId:string;to:HexCoordinate;reason:'pushback'|'retreat'|'capture'}
-  | {type:'CAT_MOVED';die:number;from:HexCoordinate;to:HexCoordinate;blocked:boolean}
+  | {type:'CAT_MOVED';chosenBy?:string;die:number;from:HexCoordinate;to:HexCoordinate;blocked:boolean}
   | {type:'CAT_RESPAWNED';health:number;occupied:boolean}
   | {type:'CAT_FINISHED';sourceId:string}
   | {type:'ARENA_STARTED';arenaNumber:1|2}
@@ -31,6 +31,6 @@ export type GameEvent = {type:'COMBAT_MATH';arena:1|2;hits:number;canceled:numbe
   | {type:'ARENA_ENDED';winnerId?:string};
 export interface GameState { automatic?:boolean;mode?:'local'|'ai'; content?:ContentState; phase:GamePhase; arenaNumber:1|2; roundNumber:number; activePlayerId:PlayerId; turnOrder:PlayerId[]; players:Record<PlayerId,PlayerState>; board:BoardState; cat:{maxHealth:9;health:number;position:HexCoordinate;spawnPosition:HexCoordinate;alive:boolean;offBoard?:boolean}; rng:RNGState; eventLog:GameEvent[]; combat?:CombatState; arenaWinnerId?:string; seatOrder:PlayerId[]; arenaResults:ArenaResult[]; arenaTemplate?:BoardState; burrowPlacement?:{order:PlayerId[];placed:PlayerId[]}; winnerId?:PlayerId; finalDuel?:{participants:PlayerId[];choices:Record<PlayerId,string>;stage:'selection'|'combat';attempt:number} }
 export interface ArenaResult {arenaNumber:1|2;winnerId?:PlayerId;reason:'round_limit'|'last_survivor'|'no_survivors'|'unbroken_tie';ranking:PlayerId[];favor:Record<PlayerId,number>}
-export type GameAction = ContentAction | {type:'PLACE_BURROW';playerId:PlayerId;destination:HexCoordinate} | {type:'MOVE';playerId:PlayerId;path:HexCoordinate[]} | {type:'CONTINUE_ARENA'|'START_ARENA_2'|'ROLL_CAT_MOVEMENT'|'END_TURN'|'CONFIRM_ATTACK'|'CONFIRM_DODGE';playerId:PlayerId} | {type:'SPEND_FERVOR';playerId:PlayerId;dieIndex:number} | {type:'SELECT_PUSHBACK';playerId:PlayerId;destination:HexCoordinate} | LifecycleAction;
+export type GameAction = {type:'CHOOSE_CAT_DIRECTION';playerId:PlayerId;direction:number} | ContentAction | {type:'PLACE_BURROW';playerId:PlayerId;destination:HexCoordinate} | {type:'MOVE';playerId:PlayerId;path:HexCoordinate[]} | {type:'CONTINUE_ARENA'|'START_ARENA_2'|'ROLL_CAT_MOVEMENT'|'END_TURN'|'CONFIRM_ATTACK'|'CONFIRM_DODGE';playerId:PlayerId} | {type:'SPEND_FERVOR';playerId:PlayerId;dieIndex:number} | {type:'SELECT_PUSHBACK';playerId:PlayerId;destination:HexCoordinate} | LifecycleAction;
 export type LifecycleAction = {type:'SELECT_DUEL_RAT';playerId:PlayerId;ratId:string} | {type:'SELECT_BET';playerId:PlayerId;targetId:PlayerId};
 export interface GameConfig { seed:number; playerCount:2|3|4; board?:BoardState; content?:boolean; automatic?:boolean; mode?:'local'|'ai' }

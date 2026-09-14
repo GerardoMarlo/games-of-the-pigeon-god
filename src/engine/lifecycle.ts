@@ -1,4 +1,4 @@
-import { claimDecrees } from './content/decrees';
+import { claimDecrees,restockDecrees } from './content/decrees';
 import { resetContentArena } from './content/state';
 import { beginPlacement } from './burrows';
 import { generateArena } from '../content/arena';
@@ -71,7 +71,7 @@ function startArenaTwo(state:GameState):void {
     const p=state.players[id],reserved=p.draftedRats.find(r=>r.id!==p.currentRat.ratId)!;
     deploy(state,p,reserved.id,i);
   }
-  state.arenaNumber=2;state.roundNumber=1;delete state.arenaWinnerId;delete state.combat;
+  state.arenaNumber=2;state.roundNumber=1;restockDecrees(state);delete state.arenaWinnerId;delete state.combat;
   carryCatToArena(state);state.cat.alive=true;
   state.eventLog.push({type:'ARENA_STARTED',arenaNumber:2});phase(state,'ROUND_START');beginTurn(state);
 }

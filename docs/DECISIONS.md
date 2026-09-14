@@ -89,3 +89,6 @@ Human Attack and Dodge rolls remain explicit. Existing Fervor keeps the roll dec
 Combat displays the Arena and logs incoming Hits, cancellations and counter damage. Arena 2 Attack sixes yield two Hits: one Dodge five cancels one, leaving one damage. Arena 1 sixes yield one Hit.
 
 AI setup correction: AI Burrows are chosen uniformly from currently legal placements using the engine seeded RNG. There is no preferred side or forced spacing; adjacent placements remain possible by chance. Human placement and Arena 2 layout preservation are unchanged.
+
+Owner correction: Decree replacements stop when the Arena ends, including its final elimination. Only already revealed Decrees may be awarded during Arena-end scoring. Empty slots refill (up to four, deck permitting) when Arena 2 begins, after player trackers reset. There is no refill after Arena 2 or in the Final Duel.
+Eliminated players choose one of the six Cat movement directions on their Turn instead of rolling. Normal Cat blockers, out-of-bounds respawn and combat rules still apply. This is their one Cat movement for that Turn. A Finish caused by that movement grants the eliminated mover 3 Divine Favor (replaces 1). Early elimination betting remains mandatory when eligible. The UI explains betting and the Cat Finish reward to eliminated players.

@@ -140,3 +140,16 @@ it('Hueso can extend a combat-triggering Move after normal displacement',()=>{
 
 it.each(['ultimo','herido','maltrecho','dueno','centro'])('early Arena ending evaluates %s for the sole surviving Rat',id=>{const s=fixture();s.roundNumber=2;s.players.p1.currentRat.position={q:0,r:0};s.players.p1.currentRat.health=1;s.cat.position={q:1,r:0};for(const id of ['p2','p3']){s.players[id].currentRat.alive=false;s.players[id].currentRat.health=0;s.players[id].eliminated=true;}s.content!.decrees=[id];claimDecrees(s,'immediate');expect(s.content!.claims).toHaveLength(0);finishArena(s);expect(s.content!.claims).toContainEqual({cardId:id,playerId:'p1',arenaNumber:1});});
 it('dead Rats do not qualify for Arena-end survival cards',()=>{const s=fixture();s.content!.decrees=['herido','maltrecho','centro'];for(const p of Object.values(s.players)){p.currentRat.alive=false;p.currentRat.health=0;p.eliminated=true;}finishArena(s);expect(s.content!.claims).toHaveLength(0);});
+
+it('does not chain replacement Decrees at Arena end; refills at Arena 2 start',()=>{
+ const s=fixture();s.content!.decrees=['pacifista'];s.content!.decreeDeck=['herido','maltrecho','centro','dueno'];
+ const deck=[...s.content!.decreeDeck];finishArena(s);
+ expect(s.content!.decreeDeck).toEqual(deck);expect(s.content!.claims.map(c=>c.cardId)).toEqual(['pacifista']);
+ let next=dispatch(s,{type:'CONTINUE_ARENA',playerId:s.activePlayerId});expect(next.content!.decrees).toHaveLength(0);
+ next=dispatch(next,{type:'START_ARENA_2',playerId:next.activePlayerId});expect(next.content!.decrees).toEqual(deck);
+});
+it('a final elimination cannot refill immediate Decrees before Arena scoring',()=>{
+ const s=fixture();s.content!.decrees=['remata-uno'];s.content!.decreeDeck=['gloria'];s.players.p1.finishes=1;
+ for(const id of ['p2','p3']){s.players[id].currentRat.alive=false;s.players[id].eliminated=true;}
+ claimDecrees(s,'immediate');expect(s.content!.decreeDeck).toEqual(['gloria']);expect(s.content!.decrees).toEqual([]);
+});

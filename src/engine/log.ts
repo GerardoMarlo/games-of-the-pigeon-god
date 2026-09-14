@@ -9,7 +9,7 @@ export function describeEvent(e:GameEvent):string {
     case 'BET_PLACED':return `${e.playerId} bets on ${e.targetId}.`;
     case 'MATCH_ENDED':return `${e.winnerId} wins the Match.`;
     case 'DUEL_STARTED':return `Final Duel begins (attempt ${e.attempt}).`;
-    case 'CAT_MOVED':return `Cat movement die ${e.die}: ${e.blocked?'blocked; stays put':`toward (${e.to.q}, ${e.to.r})`}.`;
+    case 'CAT_MOVED':return `${e.chosenBy?`${e.chosenBy.toUpperCase()} chose Cat direction ${e.die}`:`Cat movement die ${e.die}` }: ${e.blocked?'blocked; stays put':`toward (${e.to.q}, ${e.to.r})`}.`;
     case 'CAT_RESPAWNED':return `Cat respawns with ${e.health} Health${e.occupied?'; spawn occupied: combat':''}.`;
     case 'CAT_FINISHED':return `${e.sourceId} Finished the Cat.`;
     case 'PHASE_CHANGED':return e.phase.replaceAll('_',' ');

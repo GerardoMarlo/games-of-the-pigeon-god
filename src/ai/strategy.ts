@@ -1,5 +1,5 @@
 import type { getVisibleState } from '../engine/game';
-import { distance } from '../engine/hex';
+import { distance,directions }  from '../engine/hex';
 import type { GameAction } from '../engine/types';
 export type Observation=ReturnType<typeof getVisibleState>;
 export const AI_WEIGHTS={damage:15,finish:100,survival:12,decree:40,favor:60,fervor:8,approach:5,center:15,catDanger:10};
@@ -7,6 +7,7 @@ function destination(a:GameAction){return a.type==='MOVE'||a.type==='EFFECT_ACTI
 export function evaluateAction(view:Observation,id:string,a:GameAction):number {
  const p=view.players.find(p=>p.id===id)!,rat=p.draftedRats.find(r=>r.id===p.currentRat.ratId)!,to=destination(a);
  const enemies=view.players.filter(o=>o.id!==id&&o.currentRat.alive&&!o.currentRat.inBurrow);
+ if(a.type==='CHOOSE_CAT_DIRECTION'){const d=directions[a.direction-1],target={q:view.cat.position.q+d.q,r:view.cat.position.r+d.r};const victim=enemies.find(e=>distance(e.currentRat.position,target)===0);return victim?100-victim.currentRat.health*10:-Math.min(...enemies.map(e=>distance(e.currentRat.position,target)),10);}
  if(a.type==='END_TURN')return p.actionsRemaining? -50:0;
  if(a.type==='SELECT_BET'){const target=view.players.find(p=>p.id===a.targetId)!;return target.currentRat.health+target.finishes*10+target.attacks;}
  if(a.type==='SELECT_DUEL_RAT'){const r=p.draftedRats.find(r=>r.id===a.ratId)!;return r.maxHealth*3+r.attackDice*4+r.speed;}

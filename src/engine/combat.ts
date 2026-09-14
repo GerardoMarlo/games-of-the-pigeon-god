@@ -112,7 +112,7 @@ function finish(state:GameState,victimId:string,killerId:string):void {
     state.eventLog.push({type:'RAT_FINISHED',playerId:victimId,sourceId:killerId});
     const credit=state.combat?.catCreditPlayerId;
     if(killerId==='cat' && credit && victimId!==credit){
-      state.players[credit].divineFavor++;state.eventLog.push({type:'FAVOR_CHANGED',playerId:credit,amount:1});
+      state.players[credit].divineFavor+=RULES.eliminatedCatFinishFavor;state.eventLog.push({type:'FAVOR_CHANGED',playerId:credit,amount:RULES.eliminatedCatFinishFavor});
     }
   }
 }

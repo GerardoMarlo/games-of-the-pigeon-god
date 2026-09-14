@@ -1,4 +1,5 @@
 import { decreeCards,type DecreeCard } from '../../content/decrees';
+import { RULES } from '../rules';
 import { equal } from '../hex';
 import type { GameState } from '../types';
 import { ability,bonusAction } from './state';
@@ -13,8 +14,13 @@ export function qualifies(state:GameState,id:string,card:DecreeCard):boolean {
   case 'arena_end':return p.currentRat.alive&&(c.healthMax===undefined||p.currentRat.health<=c.healthMax)&&(c.healthExact===undefined||p.currentRat.health===c.healthExact)&&(!c.center||!p.currentRat.inBurrow&&equal(p.currentRat.position,state.board.catSpawn))&&(!c.sole||Object.values(state.players).filter(o=>o.currentRat.alive).length===1)&&(!c.highestHealth||Object.values(state.players).filter(o=>o.id!==id&&o.currentRat.alive).every(o=>p.currentRat.health>o.currentRat.health));
  }
 }
+export function restockDecrees(state:GameState):void {
+ const c=state.content;if(!c||state.finalDuel)return;
+ while(c.decrees.length<4&&c.decreeDeck.length)c.decrees.push(c.decreeDeck.shift()!);
+}
 export function claimDecrees(state:GameState,timing:'immediate'|'end_of_arena'):void {
  const c=state.content;if(!c||state.finalDuel)return;
+ const restock=timing==='immediate'&&!['ARENA_END','BETWEEN_ARENAS','MATCH_END'].includes(state.phase)&&Object.values(state.players).filter(p=>p.currentRat.alive).length>1&&!(state.roundNumber===RULES.roundsPerArena&&state.activePlayerId===state.turnOrder.at(-1)&&state.players[state.activePlayerId].actionsRemaining===0);
  const start=state.turnOrder.indexOf(state.activePlayerId),order=[...state.turnOrder.slice(start),...state.turnOrder.slice(0,start)];
  // A finite deck bounds replacement chains. New cards are active immediately.
  let changed=true;
@@ -27,7 +33,7 @@ export function claimDecrees(state:GameState,timing:'immediate'|'end_of_arena'):
    c.claims.push({cardId:id,playerId:winner,arenaNumber:state.arenaNumber});state.players[winner].divineFavor+=card.reward;
    state.eventLog.push({type:'DECREE_CLAIMED',playerId:winner,cardId:id,name:card.name,reward:card.reward,slot});
    if(timing==='immediate'&&ability(state,winner)==='decree_action')bonusAction(state,winner,false);
-   const replacement=c.decreeDeck.shift();if(replacement)c.decrees.push(replacement);changed=true;
+   if(restock)restockDecrees(state);changed=true;
   }
  }
 }

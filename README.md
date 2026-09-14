@@ -54,3 +54,7 @@ Roll-button clarification: Rats explicitly click Roll Attack and Roll Dodge. App
 The supplied board tiles, Burrows, resource tokens and card illustrations now appear in the playable interface. Divine Favor displays as a circular medallion. The UI includes Rat HUDs and trackers, four public Decrees, equipped Item descriptions, explicit Attack/Dodge controls, legal approach previews, a readable event chronicle, movement transitions and reduced-motion support. Local/AI mode and 2–4-player setup remain available through Match settings.
 
 The rules engine is unchanged. See [artwork provenance](docs/reference/ARTWORK.md). Full drafting, save/resume and Hard AI remain pending.
+
+## Production deployment
+
+See [Cloudflare Pages deployment](docs/DEPLOYMENT.md) for build settings, route fallback and production verification. Build with `npm run build`; publish `dist/`.

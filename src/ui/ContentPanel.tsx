@@ -12,6 +12,7 @@ export function ContentPanel({state,actions,send,view}:Props){
   {view!=='decrees'&&state.content.effects[0]&&state.phase==='CONTENT_EFFECT'&&<p>{state.content.effects[0].playerId.toUpperCase()}: {state.content.effects[0].reason}, {state.content.effects[0].steps} hex(es) remaining.</p>}
   {view!=='decrees'&&actions.map((a,i)=>{
    let label=labels[a.type];
+   if(a.type==='CHOOSE_CAT_DIRECTION')label=`Move Cat ${['east','northeast','northwest','west','southwest','southeast'][a.direction-1]} (direction ${a.direction})`;
    if(a.type==='USE_ITEM')label=`Use ${itemCards.find(c=>c.id===a.itemId)?.name}${a.dieIndex!==undefined?` · die ${a.dieIndex+1}`:''}${a.direction?` · direction ${a.direction}`:''}${a.destination?` · (${a.destination.q}, ${a.destination.r})`:''}`;
    if(a.type==='USE_ABILITY')label=`Rat ability · die ${a.dieIndex+1}`;
    if(!label)return null;
