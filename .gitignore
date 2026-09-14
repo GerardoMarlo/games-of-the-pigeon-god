@@ -4,3 +4,5 @@ dist/
 coverage/
 *.local
 *.local.png
+
+/marlo-play/

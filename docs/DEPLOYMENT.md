@@ -24,3 +24,12 @@ Run `pnpm test`, `npm run build`, and optionally `npm run preview`. Output is ex
 After deployment, check `/`, open and refresh `/play/test`, and verify artwork and Match settings. A refresh loads a new match; save/resume is not implemented yet. This repository preparation does not create or publish a Cloudflare project.
 
 References: https://developers.cloudflare.com/pages/configuration/build-configuration/ and https://developers.cloudflare.com/pages/configuration/serving-pages/
+
+
+## MARLO path gateway
+
+Canonical game URL: https://play.marlo.games/pigeongod. The independent portal/router repository is https://github.com/GerardoMarlo/marlo-play. Origin custom domain: pigeongod-origin.marlo.games, registered on this Pages project with a proxied CNAME to games-of-the-pigeon-god.pages.dev.
+
+Vite emits relative bundle URLs. index.html supplies a root base for direct Pages access. The gateway streams HTML through HTMLRewriter to replace the base with /pigeongod/ and add the public canonical URL; all runtime artwork resolves against document.baseURI. Origin requests strip only the game prefix. Both direct Pages previews and nested public refreshes remain supported. Do not restore hardcoded root artwork URLs.
+
+Deploy this repository as before; the portal does not rebuild when this game changes. No Origin Rules or Transform Rules are required. See the portal repository README for new-game setup and rollback.
