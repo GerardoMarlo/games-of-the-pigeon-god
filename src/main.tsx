@@ -1,3 +1,4 @@
+import { useCelebrations,Celebrations } from './ui/useCelebrations';
 import { PlayerHUD } from './ui/PlayerHUD';
 import { ItemArt,FavorIcon } from './ui/Art';
 import { ContentPanel } from './ui/ContentPanel';
@@ -37,8 +38,9 @@ function App() {
   useEffect(()=>controller.subscribe(()=>refresh(n=>n+1)),[controller]);
   const state=controller.getState(),actions=controller.getLegalActions();
   const revision=controller.getRevision();
+  const celebrations=useCelebrations(state);
   useEffect(()=>{
-    const ai=setTimeout(()=>{try{controller.aiStep();}catch(e){setError(String(e));}},500);
+    const ai=setTimeout(()=>{try{controller.aiStep();}catch(e){setError(String(e));}},1100);
     const p=state.players[state.activePlayerId];let timer:ReturnType<typeof setTimeout>|undefined,interval:ReturnType<typeof setInterval>|undefined;
     if(state.phase==='PLAYER_ACTION'&&p.actionsRemaining===0&&!p.currentRat.inBurrow&&p.controller==='human'){
       setCountdown(5);interval=setInterval(()=>setCountdown(n=>n===undefined?undefined:Math.max(0,n-1)),1000);timer=setTimeout(()=>controller.expireTurn(revision),5000);
@@ -49,13 +51,13 @@ function App() {
   const current=state.players[selected]??state.players.p1;
   const recent=state.eventLog.slice(-5);
   const phaseText=state.phase==='ARENA_SETUP'?`${state.activePlayerId.toUpperCase()}, choose your Burrow`:state.phase==='PLAYER_ACTION'?`${state.activePlayerId.toUpperCase()}'s Turn`:state.phase==='COMBAT'?'Clash in the Arena':state.phase.replaceAll('_',' ').toLowerCase();
-  return <main>
+  return <main><Celebrations claims={celebrations.claims}/>
     <header className="masthead"><div className="brand"><FavorIcon/><div><span className="eyebrow">THE GAMES OF THE</span><h1>Pigeon God</h1></div></div><nav><button onClick={()=>setHelp(true)}>How to play</button><button onClick={()=>setSettings(true)}>Match settings</button><span className="mode-tag">{state.mode==='ai'?'Human vs AI':'Local multiplayer'}</span></nav></header>
     <div className="match-bar"><div><span className="eyebrow">{state.finalDuel?'SUDDEN DEATH':'THE ARENA AWAITS'}</span><h2>{state.finalDuel?'Final Duel':`Arena ${state.arenaNumber}`} <span>/ {state.finalDuel?'Last Rat standing':'2'}</span></h2></div><div className="rounds"><span>ROUND {state.roundNumber} / {state.finalDuel?'∞':'5'}</span><div>{[1,2,3,4,5].map(n=><i key={n} className={n<=state.roundNumber?'filled':''}/>)}</div></div><div className="turn-order"><span>TURN ORDER</span><p>{state.turnOrder.map(id=><b className={id===state.activePlayerId?'active':''} key={id}>{id.toUpperCase()}</b>)}</p></div><div className="cat-status"><img src="/art/cat.webp" alt="Cat"/><span>THE CAT<br/><b>{state.cat.health} / 9 Health</b><small>4 Attack dice</small></span></div></div>
     <ContentPanel state={state} actions={actions} send={send} view="decrees"/>
     {error&&<p role="alert" className="error">{error}</p>}
     <div className="game-layout"><PlayerHUD state={state} selected={selected} onSelect={setSelected}/><div className="arena-column"><div className="turn-banner"><div><span className="eyebrow">{state.mode==='ai'&&state.players[state.activePlayerId].controller==='ai'?'AI OPPONENT':'YOUR NEXT DECISION'}</span><h2>{phaseText}</h2></div><span className="action-count">{state.players[state.activePlayerId].actionsRemaining} Actions</span></div>
-    <Board state={state} actions={actions} send={send} selected={selected} onSelect={setSelected}/>
+    <Board winners={celebrations.winners} state={state} actions={actions} send={send} selected={selected} onSelect={setSelected}/>
     <div className="decision-panel"><p className="countdown" role="status">{countdown!==undefined?`Turn ends in ${countdown}s — use an Item or end early.`:state.phase==='PLAYER_ACTION'?'Choose a highlighted hex to move. Hover to preview the approach.':state.phase==='ARENA_SETUP'?'Choose a highlighted location. Burrows are one-way; leave on your first Turn.':''}</p><CombatPanel state={state} actions={actions} dispatch={send}/><ContentPanel state={state} actions={actions} send={send} view="actions"/><LifecyclePanel state={state} actions={actions} send={send}/>{actions.some(a=>a.type==='END_TURN')&&<button className="end-turn" onClick={()=>send({type:'END_TURN',playerId:state.activePlayerId})}>End Turn →</button>}</div></div>
     <aside className="side-panel"><span className="eyebrow">SELECTED GLADIATOR</span><h2>{current.draftedRats.find(r=>r.id===current.currentRat.ratId)?.name}</h2><p>{current.draftedRats.find(r=>r.id===current.currentRat.ratId)?.description}</p><h3>Equipped Items</h3>{state.content?.players[current.id].items.length?state.content.players[current.id].items.map(id=><article className="inventory-card" key={id}><ItemArt id={id}/><strong>{itemCards.find(c=>c.id===id)?.name}</strong><p>{itemCards.find(c=>c.id===id)?.description}</p></article>):<p className="empty-slot">No Item equipped<br/><small>Request one for 1 Action.</small></p>}<h3>Arena chronicle</h3><div className="chronicle" aria-live="polite">{recent.map((e,i)=><p key={`${state.eventLog.length}-${i}`}>{describeEvent(e)}</p>)}</div><details><summary>Full game log · {state.eventLog.length}</summary><pre>{state.eventLog.map(describeEvent).join('\n')}</pre></details></aside></div>
     <footer><span>THE GAMES OF THE PIGEON GOD</span><span>Milestone 7 · Playtest edition · Seed {seed}</span></footer>

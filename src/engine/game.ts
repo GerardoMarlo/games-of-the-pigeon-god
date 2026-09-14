@@ -121,7 +121,7 @@ export function settle(input:GameState):GameState {
    else if(!all.some(a=>a.type==='USE_ITEM'&&['cascabel','moneda'].includes(a.itemId)))type='CONFIRM_CAT_DIRECTION';
   }else if(state.combat){
    const stage=state.combat.stage;
-   if(stage==='PUSHBACK'&&all.filter(a=>a.type==='SELECT_PUSHBACK').length===1)type='SELECT_PUSHBACK';
+   if(['PUSHBACK','CAT_RETREAT'].includes(stage)&&all.filter(a=>a.type==='SELECT_PUSHBACK').length===1)type='SELECT_PUSHBACK';
    // Human/AI Rats explicitly roll; only the neutral Cat rolls automatically.
    if(stage==='BEFORE_ATTACK'&&state.combat.attackerId==='cat')type='ROLL_ATTACK';
    const relevant=stage==='ATTACK_RESPONSE'?['arena']:stage==='AFTER_DAMAGE'?['clavo','hueso']:undefined;

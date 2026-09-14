@@ -7,8 +7,8 @@ import { isBurrow } from './burrows';
 import { checkEliminationEnd } from './lifecycle';
 import { respawnCat } from './cat';
 import { endTurn, grantActions } from './turns';
-import { equal, neighbors, type HexCoordinate } from './hex';
-import { empty } from './movement';
+import { distance, equal, key, neighbors, type HexCoordinate } from './hex';
+import { empty,occupant } from './movement';
 import { rollD6 } from './rng';
 import { RULES } from './rules';
 import type { CombatState, GameAction, GameState, PlayerState } from './types';
@@ -22,6 +22,7 @@ export function rollResult(attack:readonly number[],dodge:readonly number[],aren
 }
 export function combatActor(state:GameState):string {
   const c=state.combat;
+  if(c?.stage==='CAT_RETREAT')return c.catPushWinnerId!;
   return c&&['ATTACK_RESPONSE','BEFORE_DODGE'].includes(c.stage)?c.defenderId:c?.stage==='DODGE'?c.defenderId:c?.stage==='PUSHBACK'?(c.winnerId==='cat'?state.activePlayerId:c.winnerId!):state.activePlayerId;
 }
 function roll(state:GameState,playerId:string,kind:'ATTACK'|'DODGE'):number[] {
@@ -31,9 +32,9 @@ function roll(state:GameState,playerId:string,kind:'ATTACK'|'DODGE'):number[] {
   const dice=Array.from({length:count},()=>rollD6(state.rng));
   state.eventLog.push({type:'ROLL',playerId,kind,dice:[...dice]});return dice;
 }
-export function startCombat(state:GameState,defenderId:string,sourceHex:HexCoordinate,destinationHex:HexCoordinate,options?:{origin:'cat_turn'|'cat_respawn';resume:'actions'|'end_turn';direction?:HexCoordinate;catCreditPlayerId?:string}):void {
+export function startCombat(state:GameState,defenderId:string,sourceHex:HexCoordinate,destinationHex:HexCoordinate,options?:{origin:'cat_turn'|'cat_respawn'|'cat_push';resume:'actions'|'end_turn';direction?:HexCoordinate;catCreditPlayerId?:string;catPushWinnerId?:string}):void {
   const attackerId=options?'cat':state.activePlayerId;
-  state.combat={attackerId,defenderId,sourceHex,destinationHex,stage:'ATTACK',attackerRoll:[],defenderRoll:[],attackerConfirmed:false,defenderConfirmed:false,attackerDamage:0,defenderDamage:0,origin:options?.origin??'rat_move',resume:options?.resume??'end_turn',direction:options?.direction,catCreditPlayerId:options?.catCreditPlayerId};
+  state.combat={attackerId,defenderId,sourceHex,destinationHex,stage:'ATTACK',attackerRoll:[],defenderRoll:[],attackerConfirmed:false,defenderConfirmed:false,attackerDamage:0,defenderDamage:0,origin:options?.origin??'rat_move',resume:options?.resume??'end_turn',direction:options?.direction,catCreditPlayerId:options?.catCreditPlayerId,catPushWinnerId:options?.catPushWinnerId};
   if(!options)state.players[attackerId].actionsRemaining=Math.max(0,state.players[attackerId].actionsRemaining-1);
   state.phase='COMBAT';state.eventLog.push({type:'COMBAT_TRIGGERED',attackerId,defenderId},{type:'PHASE_CHANGED',phase:'COMBAT'});
   if(state.content){state.content.combat={attackDice:0,dodgeDice:0,cancelHits:0,cancelAttack:false,attackAbilityUsed:false,dodgeAbilityUsed:false};state.combat.stage='BEFORE_ATTACK';return;}
@@ -46,9 +47,17 @@ export function startCombat(state:GameState,defenderId:string,sourceHex:HexCoord
 }
 export function pushbackHexes(state:GameState):HexCoordinate[] {
   const c=state.combat;
-  if(!c || c.stage!=='PUSHBACK')return [];
+  if(!c || !['PUSHBACK','CAT_RETREAT'].includes(c.stage))return [];
+  if(c.stage==='CAT_RETREAT')return neighbors(c.destinationHex).filter(h=>empty(state,h));
   // Attacker is still at source until capture: source is occupied, never a push destination.
-  return neighbors(c.destinationHex).filter(h=>empty(state,h)||(c.attackerId==='cat'&&c.winnerId!== 'cat'&&!state.cat.offBoard&&equal(h,state.cat.position)));
+  return neighbors(c.destinationHex).filter(h=>catPushTarget(state,h)||empty(state,h)||(c.attackerId==='cat'&&c.winnerId!== 'cat'&&!state.cat.offBoard&&equal(h,state.cat.position)));
+}
+// A defeated Cat can be pushed onto an adjacent rival to start another combat.
+function catPushTarget(state:GameState,h:HexCoordinate):boolean {
+ const c=state.combat!;if(c.winnerId==='cat'||![c.attackerId,c.defenderId].includes('cat'))return false;
+ const id=occupant(state,h);if(!id||id==='cat'||id===c.winnerId)return false;
+ const tile=state.board.hexes[key(h)];
+ return !!tile&&!isBurrow(state,h)&&!['rock','crate','sewer'].includes(tile.terrain);
 }
 export function combatActions(state:GameState,playerId:string):GameAction[] {
   const c=state.combat;
@@ -57,7 +66,7 @@ export function combatActions(state:GameState,playerId:string):GameAction[] {
   if(c.stage==='ATTACK_RESPONSE')return [{type:'ACCEPT_ATTACK',playerId}];
   if(c.stage==='BEFORE_DODGE')return [{type:'ROLL_DODGE',playerId}];
   if(c.stage==='AFTER_DAMAGE')return [{type:'RESOLVE_COMBAT',playerId}];
-  if(c.stage==='PUSHBACK')return pushbackHexes(state).map(destination=>({type:'SELECT_PUSHBACK',playerId,destination}));
+  if(c.stage==='PUSHBACK'||c.stage==='CAT_RETREAT')return pushbackHexes(state).map(destination=>({type:'SELECT_PUSHBACK',playerId,destination}));
   const actions:GameAction[]=[{type:c.stage==='ATTACK'?'CONFIRM_ATTACK':'CONFIRM_DODGE',playerId}];
   if(state.players[playerId].fervor>0)(c.stage==='ATTACK'?c.attackerRoll:c.defenderRoll).forEach((_,dieIndex)=>actions.push({type:'SPEND_FERVOR',playerId,dieIndex}));
   return actions;
@@ -132,6 +141,25 @@ function resolve(state:GameState,c:CombatState):void {
   if(state.content){combatRewards(state);claimDecrees(state,'immediate');if(Object.values(state.players).filter(p=>p.currentRat.alive).length<=1){complete(state,c);return;}c.stage='AFTER_DAMAGE';return;}
   finishDisplacement(state,c);
 }
+// Owner correction: a surrounded chained-combat defender goes to Cat spawn.
+function sendDefenderToSpawn(state:GameState,c:CombatState):void {
+ const spawn=state.cat.spawnPosition;
+ const nearestEmpty=()=>Object.values(state.board.hexes).map(h=>h.coordinate).filter(h=>empty(state,h)).sort((a,b)=>distance(a,spawn)-distance(b,spawn)||a.q-b.q||a.r-b.r)[0];
+ // TODO owner ruling for occupied spawn: isolated collision policy, never overlap entities.
+ if(equal(spawn,c.destinationHex)){
+   const retreat=nearestEmpty();if(!retreat)throw new Error('No space for Cat spawn fallback');
+   displace(state,'cat',retreat,'retreat');
+ }else{
+   const blocker=occupant(state,spawn);
+   if(blocker&&blocker!=='cat'){
+     const relocation=nearestEmpty();if(!relocation)throw new Error('No space for Cat spawn fallback');
+     displace(state,blocker,relocation,'pushback');
+     state.eventLog.push({type:'CONTENT',message:`Occupied Cat spawn: ${blocker.toUpperCase()} relocates to the nearest empty hex (provisional collision rule).`});
+   }
+   displace(state,c.defenderId,spawn,'pushback');displace(state,'cat',c.destinationHex,'capture');
+ }
+ state.eventLog.push({type:'CONTENT',message:`${c.defenderId.toUpperCase()} is sent to the Cat spawn because no adjacent pushback hex is available.`});
+}
 function finishDisplacement(state:GameState,c:CombatState):void {
   if(alive(state,c.attackerId)&&!alive(state,c.defenderId))displace(state,c.attackerId,c.destinationHex,'capture');
   else if(alive(state,c.attackerId)&&alive(state,c.defenderId)){
@@ -143,6 +171,8 @@ function finishDisplacement(state:GameState,c:CombatState):void {
         const d=c.direction??{q:c.destinationHex.q-c.sourceHex.q,r:c.destinationHex.r-c.sourceHex.r};
         const to={q:c.destinationHex.q+d.q,r:c.destinationHex.r+d.r};
         if(empty(state,to)){displace(state,c.defenderId,to,'pushback');displace(state,'cat',c.destinationHex,'capture');}
+        else if(c.origin==='cat_push'&&!neighbors(c.destinationHex).some(h=>empty(state,h))){sendDefenderToSpawn(state,c);}
+        else if(c.origin==='cat_push'&&!empty(state,c.sourceHex)){c.stage='CAT_RETREAT';return;}
         else displace(state,'cat',c.sourceHex,'retreat');
       }else{
         c.stage='PUSHBACK';if(pushbackHexes(state).length)return;
@@ -170,6 +200,17 @@ export function applyCombatAction(state:GameState,action:GameAction):void {
   }else if(action.type==='CONFIRM_DODGE'){
     c.defenderConfirmed=true;state.eventLog.push({type:'ROLL_CONFIRMED',playerId:action.playerId,kind:'DODGE'});resolve(state,c);
   }else if(action.type==='SELECT_PUSHBACK'){
+    if(c.stage==='CAT_RETREAT'){displace(state,'cat',action.destination,'retreat');complete(state,c);return;}
+    const target=catPushTarget(state,action.destination)?occupant(state,action.destination):undefined;
+    if(target){
+      const source={...c.destinationHex};
+      if(c.attackerId!=='cat')displace(state,c.attackerId,c.destinationHex,'capture');
+      state.cat.position={...action.destination};state.cat.offBoard=true;
+      state.eventLog.push({type:'CONTENT',message:`${action.playerId.toUpperCase()} pushes the Cat into ${target.toUpperCase()}: chained combat.`});
+      startCombat(state,target,source,action.destination,{origin:'cat_push',resume:c.resume??'end_turn',direction:{q:action.destination.q-source.q,r:action.destination.r-source.r},catCreditPlayerId:c.catCreditPlayerId,catPushWinnerId:action.playerId});
+      return;
+    }
+
     if(c.attackerId==='cat'&&c.winnerId!== 'cat')displace(state,'cat',action.destination,'pushback');
     else {displace(state,c.defenderId,action.destination,'pushback');displace(state,c.attackerId,c.destinationHex,'capture');}
     complete(state,c);

@@ -1,7 +1,7 @@
 import { decreeCards,type DecreeCard } from '../../content/decrees';
 import { equal } from '../hex';
 import type { GameState } from '../types';
-import { ability,bonusAction,note } from './state';
+import { ability,bonusAction } from './state';
 export function qualifies(state:GameState,id:string,card:DecreeCard):boolean {
  const p=state.players[id],c=card.condition;
  switch(c.kind){
@@ -23,9 +23,9 @@ export function claimDecrees(state:GameState,timing:'immediate'|'end_of_arena'):
    const card=decreeCards.find(d=>d.id===id)!;
    if(card.timing!==timing&&!(timing==='end_of_arena'&&card.timing==='immediate'))continue;
    const winner=order.find(playerId=>qualifies(state,playerId,card));if(!winner)continue;
-   c.decrees.splice(c.decrees.indexOf(id),1);c.decreeDiscard.push(id);
+   const slot=c.decrees.indexOf(id);c.decrees.splice(slot,1);c.decreeDiscard.push(id);
    c.claims.push({cardId:id,playerId:winner,arenaNumber:state.arenaNumber});state.players[winner].divineFavor+=card.reward;
-   note(state,`${winner} claims ${card.name}: +${card.reward} Divine Favor.`);
+   state.eventLog.push({type:'DECREE_CLAIMED',playerId:winner,cardId:id,name:card.name,reward:card.reward,slot});
    if(timing==='immediate'&&ability(state,winner)==='decree_action')bonusAction(state,winner,false);
    const replacement=c.decreeDeck.shift();if(replacement)c.decrees.push(replacement);changed=true;
   }

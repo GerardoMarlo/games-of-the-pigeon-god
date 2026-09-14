@@ -161,3 +161,11 @@ Roll-button clarification: Rats explicitly click Roll Attack and Roll Dodge. App
 
 ## Milestone 7 delivery
 Illustrated responsive Arena, Rat HUDs, English card presentation, circular Divine Favor, explicit dice controls, legal path previews, Item controls, event chronicle and reduced-motion presentation. UI reads legal actions and dispatches to the unchanged engine. All 191 engine tests and 1,000 AI Matches pass. Full drafting and Milestone 8 features remain pending. See reference/ARTWORK.md.
+
+
+Combat presentation and Cat push update
+- Winning a combat against a surviving Cat permits pushing it onto an adjacent rival Rat on a legal Arena hex. This immediately starts a Cat attack against that Rat, without another Cat movement roll or Action charge. Pending card effects and the original Turn continuation resume after the chain.
+- If the Cat wins the chained combat, use its normal forward push when legal. If that push is blocked but adjacent empty hexes exist and its return hex is occupied, the player who pushed the Cat chooses an adjacent empty Cat retreat.
+- Owner simplified the fully surrounded case: if no adjacent empty hex exists, put the defeated Rat on the Cat spawn. Do not use a three-piece approach-path displacement.
+- PROVISIONAL COLLISION POLICY / TODO owner ruling: if Cat spawn is occupied by a different Rat, relocate that blocker to the nearest empty Arena hex (axial q then r breaks equal-distance ties). If the defender already occupies spawn, leave it there and relocate the Cat to the nearest empty hex. This isolated fallback prevents overlapping pieces; it is not a confirmed physical-game rule.
+- UI: slower movement, same-hex combat presentation with crossed swords, two-second golden winner/crown celebrations, Decree claim events and flights, and tracker bars. Attack and Dodge milestones each grant +1 Fervor at 4 and 5; Finish 2 grants +1 Fervor and Finish 3 grants +1 Divine Favor. No tracker rules changed.

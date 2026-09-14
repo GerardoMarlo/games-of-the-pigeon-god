@@ -69,3 +69,11 @@ See Rulebook v1.6 section 57. The owner requested automatic noninteractive resol
 AI evaluates legal actions with tuneable heuristics and previews its best movement candidates through the engine. Simulation seeds are independent of the real RNG, hidden reserves are replaced with generic unknowns, and future deck order is removed. The actual engine still validates every chosen action. The local mode operates all seats on one machine, without networking. Test simulations may use all-AI control to verify complete Matches.
 
 Owner follow-up: restore explicit Rat Attack/Dodge roll buttons and increase the exhausted-Turn Item window to five seconds. Dice remain visible in the last-combat summary after automatic resolution.
+
+
+Combat presentation and Cat push update
+- Winning a combat against a surviving Cat permits pushing it onto an adjacent rival Rat on a legal Arena hex. This immediately starts a Cat attack against that Rat, without another Cat movement roll or Action charge. Pending card effects and the original Turn continuation resume after the chain.
+- If the Cat wins the chained combat, use its normal forward push when legal. If that push is blocked but adjacent empty hexes exist and its return hex is occupied, the player who pushed the Cat chooses an adjacent empty Cat retreat.
+- Owner simplified the fully surrounded case: if no adjacent empty hex exists, put the defeated Rat on the Cat spawn. Do not use a three-piece approach-path displacement.
+- PROVISIONAL COLLISION POLICY / TODO owner ruling: if Cat spawn is occupied by a different Rat, relocate that blocker to the nearest empty Arena hex (axial q then r breaks equal-distance ties). If the defender already occupies spawn, leave it there and relocate the Cat to the nearest empty hex. This isolated fallback prevents overlapping pieces; it is not a confirmed physical-game rule.
+- UI: slower movement, same-hex combat presentation with crossed swords, two-second golden winner/crown celebrations, Decree claim events and flights, and tracker bars. Attack and Dodge milestones each grant +1 Fervor at 4 and 5; Finish 2 grants +1 Fervor and Finish 3 grants +1 Divine Favor. No tracker rules changed.

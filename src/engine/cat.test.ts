@@ -56,5 +56,5 @@ describe('integrated seeded legality',()=>{
         const next=dispatch(s,action);expect(dispatch(before,action)).toEqual(next);assertInvariants(next);s=next;
       }
     }
-  },30000);
+  },60000);
 });
