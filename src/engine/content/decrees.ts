@@ -10,7 +10,7 @@ export function qualifies(state:GameState,id:string,card:DecreeCard):boolean {
   case 'winner':return state.arenaWinnerId===id&&(c.health===undefined||p.currentRat.health===c.health)&&(c.finishes===undefined||p.finishes>=c.finishes);
   case 'pacifist':return p.currentRat.alive&&p.attacks===0;
   case 'most':return p.currentRat.alive&&Object.values(state.players).filter(o=>o.id!==id&&o.currentRat.alive).every(o=>p[c.stat]>o[c.stat]);
-  case 'round_five':return state.roundNumber===5&&p.currentRat.alive&&(c.healthMax===undefined||p.currentRat.health<=c.healthMax)&&(c.healthExact===undefined||p.currentRat.health===c.healthExact)&&(!c.center||!p.currentRat.inBurrow&&equal(p.currentRat.position,state.board.catSpawn))&&(!c.sole||Object.values(state.players).filter(o=>o.currentRat.alive).length===1)&&(!c.highestHealth||Object.values(state.players).filter(o=>o.id!==id&&o.currentRat.alive).every(o=>p.currentRat.health>o.currentRat.health));
+  case 'arena_end':return p.currentRat.alive&&(c.healthMax===undefined||p.currentRat.health<=c.healthMax)&&(c.healthExact===undefined||p.currentRat.health===c.healthExact)&&(!c.center||!p.currentRat.inBurrow&&equal(p.currentRat.position,state.board.catSpawn))&&(!c.sole||Object.values(state.players).filter(o=>o.currentRat.alive).length===1)&&(!c.highestHealth||Object.values(state.players).filter(o=>o.id!==id&&o.currentRat.alive).every(o=>p.currentRat.health>o.currentRat.health));
  }
 }
 export function claimDecrees(state:GameState,timing:'immediate'|'end_of_arena'):void {

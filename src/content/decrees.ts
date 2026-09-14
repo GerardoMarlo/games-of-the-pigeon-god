@@ -5,7 +5,7 @@ export type DecreeCondition=
  | {kind:'winner';health?:number;finishes?:number}
  | {kind:'pacifist'}
  | {kind:'most';stat:'attacks'|'dodges'}
- | {kind:'round_five';healthMax?:number;healthExact?:number;center?:boolean;highestHealth?:boolean;sole?:boolean};
+ | {kind:'arena_end';healthMax?:number;healthExact?:number;center?:boolean;highestHealth?:boolean;sole?:boolean};
 export const decreeCards:readonly DecreeCard[]=[
  {id:'presion',name:'Under Pressure',reward:2,timing:'end_of_arena',condition:{kind:'winner',health:1}},
  {id:'venganza',name:'Vengeance',reward:3,timing:'immediate',condition:{kind:'threshold',stat:'counterFinishes',value:1}},
@@ -13,15 +13,15 @@ export const decreeCards:readonly DecreeCard[]=[
  {id:'gana-remata',name:'Win and Finish',reward:2,timing:'end_of_arena',condition:{kind:'winner',finishes:1}},
  {id:'mas-sangre',name:'More Blood',reward:2,timing:'end_of_arena',condition:{kind:'most',stat:'attacks'}},
  {id:'elusivo',name:'Elusive',reward:2,timing:'end_of_arena',condition:{kind:'most',stat:'dodges'}},
- {id:'ultimo',name:'Last Rat Standing',reward:2,timing:'end_of_arena',condition:{kind:'round_five',sole:true}},
+ {id:'ultimo',name:'Last Rat Standing',reward:2,timing:'end_of_arena',condition:{kind:'arena_end',sole:true}},
  {id:'doma',name:'Tame the Cat',reward:4,timing:'immediate',condition:{kind:'threshold',stat:'catFinishes',value:1}},
  {id:'desafia',name:'Challenge the Cat',reward:2,timing:'immediate',condition:{kind:'threshold',stat:'catDamage',value:2}},
  {id:'gloria',name:'Blood and Glory',reward:2,timing:'immediate',condition:{kind:'all',attacks:1,dodges:0,finishes:1}},
  {id:'completo',name:'Complete Gladiator',reward:2,timing:'immediate',condition:{kind:'all',attacks:1,dodges:1,finishes:1}},
- {id:'herido',name:'Wounded Survivor',reward:2,timing:'end_of_arena',condition:{kind:'round_five',healthMax:2}},
- {id:'maltrecho',name:'Battered Survivor',reward:3,timing:'end_of_arena',condition:{kind:'round_five',healthExact:1}},
- {id:'dueno',name:'Master of the Center',reward:3,timing:'end_of_arena',condition:{kind:'round_five',center:true,highestHealth:true}},
- {id:'centro',name:'Take the Center',reward:2,timing:'end_of_arena',condition:{kind:'round_five',center:true}},
+ {id:'herido',name:'Wounded Survivor',reward:2,timing:'end_of_arena',condition:{kind:'arena_end',healthMax:2}},
+ {id:'maltrecho',name:'Battered Survivor',reward:3,timing:'end_of_arena',condition:{kind:'arena_end',healthExact:1}},
+ {id:'dueno',name:'Master of the Center',reward:3,timing:'end_of_arena',condition:{kind:'arena_end',center:true,highestHealth:true}},
+ {id:'centro',name:'Take the Center',reward:2,timing:'end_of_arena',condition:{kind:'arena_end',center:true}},
  {id:'remata-dos',name:'Finish Two',reward:2,timing:'immediate',condition:{kind:'threshold',stat:'finishes',value:2}},
  {id:'remata-uno',name:'Finish One',reward:1,timing:'immediate',condition:{kind:'threshold',stat:'finishes',value:1}},
  {id:'sangre',name:'I Want Blood',reward:1,timing:'immediate',condition:{kind:'threshold',stat:'attacks',value:3}},
@@ -36,6 +36,6 @@ export function decreeDescription(card:DecreeCard):string {
   case 'winner':return `Win the Arena${c.health?` with exactly ${c.health} Health`:''}${c.finishes?` and at least ${c.finishes} Finish`:''}.`;
   case 'pacifist':return 'End the Arena alive with zero damage dealt (including counterattacks).';
   case 'most':return `End the Arena with strictly more ${c.stat} than every other surviving Rat. Ties award nobody.`;
-  case 'round_five':return `Survive to the end of Round 5${c.healthMax?` with at most ${c.healthMax} Health`:''}${c.healthExact?` with exactly ${c.healthExact} Health`:''}${c.center?' on the center hex':''}${c.highestHealth?' with more Health than every other surviving Rat':''}${c.sole?' as the only survivor':''}.`;
+  case 'arena_end':return `At the end of the Arena, be alive${c.healthMax?` with at most ${c.healthMax} Health`:''}${c.healthExact?` with exactly ${c.healthExact} Health`:''}${c.center?' on the center hex':''}${c.highestHealth?' with more Health than every other surviving Rat':''}${c.sole?' as the only survivor':''}.`;
  }
 }

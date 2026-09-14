@@ -149,7 +149,7 @@ Milestone 5 content reference: see reference/DECREES.md and the supplied grid. E
 
 ## Milestone 5 owner rulings
 
-Rulebook v1.6 section 56 governs the card implementation. Card-granted Actions/movement override normal combat Turn end. Remove every Oro card. Pacifista means zero damage dealt. Cat Finishes meet generic Finish objectives. Turno 5 means Round 5. Matching Attack pairs include misses; Místico deals three incoming Hits that remain Dodgeable and counterable. Die modifiers cap at six. Chile grants persistent normal Fervor. Esquivo requires at least one successful Dodge die. Clavo adds an extra push. A Rat blocking a Burrow entrance can be challenged using the same return-and-retry rule as the Cat.
+Rulebook v1.6 section 56 governs the card implementation. Card-granted Actions/movement override normal combat Turn end. Remove every Oro card. Pacifista means zero damage dealt. Cat Finishes meet generic Finish objectives. Printed Turno 5 Decree conditions now mean the actual end of the Arena, including early endings. Matching Attack pairs include misses; Místico deals three incoming Hits that remain Dodgeable and counterable. Die modifiers cap at six. Chile grants persistent normal Fervor. Esquivo requires at least one successful Dodge die. Clavo adds an extra push. A Rat blocking a Burrow entrance can be challenged using the same return-and-retry rule as the Cat.
 
 ## Milestone 6 owner changes
 
@@ -169,3 +169,8 @@ Combat presentation and Cat push update
 - Owner simplified the fully surrounded case: if no adjacent empty hex exists, put the defeated Rat on the Cat spawn. Do not use a three-piece approach-path displacement.
 - PROVISIONAL COLLISION POLICY / TODO owner ruling: if Cat spawn is occupied by a different Rat, relocate that blocker to the nearest empty Arena hex (axial q then r breaks equal-distance ties). If the defender already occupies spawn, leave it there and relocate the Cat to the nearest empty hex. This isolated fallback prevents overlapping pieces; it is not a confirmed physical-game rule.
 - UI: slower movement, same-hex combat presentation with crossed swords, two-second golden winner/crown celebrations, Decree claim events and flights, and tracker bars. Attack and Dodge milestones each grant +1 Fervor at 4 and 5; Finish 2 grants +1 Fervor and Finish 3 grants +1 Divine Favor. No tracker rules changed.
+
+
+September 14 owner correction — Arena-end Decrees and combat presentation
+All Decree conditions previously limited to the end of Round 5 now evaluate at the actual end of the Arena, including an early ending. Last Rat Standing, Wounded Survivor, Battered Survivor, Master of the Center and Take the Center keep their other conditions. Living eligibility and strict comparative ties are unchanged. This supersedes earlier Round-5-only card rulings.
+Human-involved combat uses a fixed translucent overlay, 650 ms presentation-only roll animation, and a three-second result display. Engine rolls/rerolls, confirmations, damage and legal actions remain authoritative. Gold marks successful dice; an independent ember outline marks currently legal Fervor rerolls. AI-only combat is not delayed by these presentation timers. Required pushback choices stay accessible in the overlay.
