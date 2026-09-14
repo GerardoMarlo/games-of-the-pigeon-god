@@ -51,10 +51,11 @@ describe('integrated seeded legality',()=>{
     for(let seed=0;seed<100;seed++){
       let s=createGame({automatic:false,content:false,board:legacyBoard(),seed,playerCount:4});
       for(let step=0;step<60&&s.phase!=='ARENA_END';step++){
-        const actions=getLegalActions(s,combatActor(s));expect(actions.length).toBeGreaterThan(0);
+        const actions=s.seatOrder.flatMap(id=>getLegalActions(s,id));expect(actions.length).toBeGreaterThan(0);
         const action=actions[seed%actions.length];const before=structuredClone(s);
         const next=dispatch(s,action);expect(dispatch(before,action)).toEqual(next);assertInvariants(next);s=next;
       }
     }
   },60000);
 });
+

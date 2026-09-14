@@ -1,8 +1,8 @@
-import { diceStyle } from './combatPresentation';
+import { diceStyle,type RollingDice } from './combatPresentation';
 import { combatActor } from '../engine/combat';
 import type { GameAction, GameState } from '../engine/types';
-interface Props { state:GameState; actions:GameAction[]; dispatch:(action:GameAction)=>void;rolling?:boolean }
-export function CombatPanel({state,actions,dispatch,rolling=false}:Props) {
+interface Props { state:GameState; actions:GameAction[]; dispatch:(action:GameAction)=>void;rolling?:boolean;rollingDice?:RollingDice }
+export function CombatPanel({state,actions,dispatch,rolling=false,rollingDice}:Props) {
   const c=state.combat;
   if(!c){
     const start=state.eventLog.map(e=>e.type).lastIndexOf('COMBAT_TRIGGERED');
@@ -11,7 +11,7 @@ export function CombatPanel({state,actions,dispatch,rolling=false}:Props) {
   }
   return <section className="combat" aria-label="Combat resolution"><h2>{c.attackerId.toUpperCase()} attacks {c.defenderId.toUpperCase()}</h2>
     <p>{c.stage==='CAT_RETREAT'?`${combatActor(state).toUpperCase()} chooses an empty adjacent hex for the Cat to retreat.`:c.stage==='PUSHBACK'?`${combatActor(state).toUpperCase()} chooses where to push ${c.attackerId==='cat'&&c.winnerId!=='cat'?'the Cat':c.defenderId.toUpperCase()}. Select an outlined board hex.`:`${combatActor(state).toUpperCase()} · ${(c.stage==='AFTER_DAMAGE'?'COMBAT RESULT':c.stage==='BEFORE_ATTACK'?'ROLL ATTACK':c.stage==='BEFORE_DODGE'?'ROLL DODGE':c.stage.replaceAll('_',' '))}`}</p>
-    {(['ATTACK','DODGE'] as const).map(kind=><div key={kind}><h3>{kind==='ATTACK'?'Attack':'Dodge'} dice {kind==='ATTACK'&&c.attackerConfirmed?'· locked':''}</h3><div className="dice">{(kind==='ATTACK'?c.attackerRoll:c.defenderRoll).map((die,index)=>{const action=c.stage===kind?actions.find(a=>a.type==='SPEND_FERVOR'&&a.dieIndex===index):undefined;return <button className={rolling?"die-rolling":diceStyle(die,kind,state.finalDuel?1:state.arenaNumber,!!action)} key={index} aria-label={`${kind} die ${index+1}: ${rolling?"rolling":die}${action?', reroll for 1 Fervor':''}`} disabled={!action} onClick={()=>action&&dispatch(action)}>{rolling?"◆":die}</button>;})}</div></div>)}
+    {(['ATTACK','DODGE'] as const).map(kind=><div key={kind}><h3>{kind==='ATTACK'?'Attack':'Dodge'} dice {kind==='ATTACK'&&c.attackerConfirmed?'· locked':''}</h3><div className="dice">{(kind==='ATTACK'?c.attackerRoll:c.defenderRoll).map((die,index)=>{const action=c.stage===kind?actions.find(a=>a.type==='SPEND_FERVOR'&&a.dieIndex===index):undefined;const animate=rolling&&rollingDice?.kind===kind&&rollingDice.indices.includes(index);return <button className={animate?"die-rolling":diceStyle(die,kind,state.finalDuel?1:state.arenaNumber,!!action)} key={index} aria-label={`${kind} die ${index+1}: ${animate?"rolling":die}${action?', reroll for 1 Fervor':''}`} disabled={!action} onClick={()=>action&&dispatch(action)}>{animate?"◆":die}</button>;})}</div></div>)}
     {!rolling&&actions.some(a=>a.type==='SPEND_FERVOR')&&<p>Fervor: {state.players[c.stage==='ATTACK'?c.attackerId:c.defenderId]?.fervor??0}. Select an enabled die to reroll for 1 Fervor.</p>}
     {actions.filter(a=>a.type==='CONFIRM_ATTACK'||a.type==='CONFIRM_DODGE').map(action=><button key={action.type} onClick={()=>dispatch(action)}>{action.type==='CONFIRM_ATTACK'?'Confirm Attack':'Confirm Dodge'}</button>)}
   </section>;

@@ -43,7 +43,7 @@ describe('deterministic full Arena lifecycle',()=>{
   it.each([2,3,4] as const)('finishes a %i-player Match on the real board using only legal decisions',playerCount=>{
     let s=createGame({automatic:false,content:false,seed:77,playerCount});
     for(let step=0;step<800&&s.phase!=='MATCH_END';step++){
-      const actions=s.seatOrder.flatMap(id=>getLegalActions(s,id)).filter(a=>a.type!=='SELECT_BET');expect(actions.length).toBeGreaterThan(0);
+      const actions=s.seatOrder.flatMap(id=>getLegalActions(s,id));expect(actions.length).toBeGreaterThan(0);
       let action=actions.find(a=>a.type!=='MOVE'&&a.type!=='END_TURN'&&a.type!=='SPEND_FERVOR');
       if(!action){
         const p=s.players[s.activePlayerId],moves=actions.filter(a=>a.type==='MOVE');
@@ -60,3 +60,4 @@ describe('deterministic full Arena lifecycle',()=>{
     expect(s.phase).toBe('MATCH_END');expect(s.winnerId).toBeDefined();expect(s.arenaResults).toHaveLength(2);
   },30000);
 });
+

@@ -19,8 +19,9 @@ export function createController(config:GameConfig) {
   },
   expireTurn:(expected:number)=>{
    if(expected!==revision||state.phase!=='PLAYER_ACTION')return;
-   const p=state.players[state.activePlayerId];if(p.actionsRemaining===0&&!p.currentRat.inBurrow)send({type:'END_TURN',playerId:p.id});
+   const p=state.players[state.activePlayerId];if(p.actionsRemaining===0&&!p.currentRat.inBurrow&&getLegalActions(state,p.id).some(a=>a.type==='END_TURN'))send({type:'END_TURN',playerId:p.id});
   },
   subscribe:(fn:()=>void)=>{listeners.add(fn);return ()=>{listeners.delete(fn);};}
  };
 }
+

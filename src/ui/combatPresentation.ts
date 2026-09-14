@@ -16,3 +16,10 @@ export function combatRecord(state:GameState,end=state.eventLog.length):CombatSt
  return c;
 }
 export function diceStyle(value:number,kind:'ATTACK'|'DODGE',arena:1|2,reroll:boolean){return [value>=(kind==='ATTACK'?4:5)?'die-success':'',value===6&&(kind==='DODGE'||arena===2)?'die-six':'',reroll?'die-ember':''].filter(Boolean).join(' ');}
+
+export interface RollingDice {kind:'ATTACK'|'DODGE';indices:number[]}
+export function rollingDice(events:GameState['eventLog']):RollingDice|undefined{
+ const e=[...events].reverse().find(e=>e.type==='ROLL'||e.type==='REROLL');
+ if(e?.type==='ROLL')return {kind:e.kind,indices:e.dice.map((_,i)=>i)};
+ if(e?.type==='REROLL')return {kind:e.kind,indices:[e.index]};
+}

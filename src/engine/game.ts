@@ -7,7 +7,7 @@ import { effectActions,applyEffect } from './content/effects';
 import { grantActions } from './turns';
 import { beginPlacement,isBurrow,placeBurrow,placementActions } from './burrows';
 import { generateArena } from '../content/arena';
-import { applyLifecycleAction, lifecycleActions } from './lifecycle';
+import { applyLifecycleAction, lifecycleActions,pendingBettor } from './lifecycle';
 import { moveCat } from './cat';
 import { beginTurn, endTurn, phase } from './turns';
 import { applyCombatAction, combatActions, startCombat } from './combat';
@@ -57,6 +57,7 @@ export function createGame(config:GameConfig):GameState {
 }
 export function getLegalActions(state:GameState,playerId:string):GameAction[] {
   if(!state.players[playerId])return [];
+  const bettor=pendingBettor(state);if(bettor)return bettor===playerId?lifecycleActions(state,playerId).filter(a=>a.type==='SELECT_BET'):[];
   const items=itemActions(state,playerId);
   if(state.phase==='CONTENT_EFFECT')return [...effectActions(state,playerId),...items];
   if(state.phase==='ARENA_SETUP')return placementActions(state,playerId);
@@ -73,6 +74,7 @@ export function getLegalActions(state:GameState,playerId:string):GameAction[] {
   return [...actions,...extra,...items];
 }
 function dispatchRaw(input:GameState,action:GameAction):GameState {
+  const bettor=pendingBettor(input);if(bettor&&(action.type!=='SELECT_BET'||action.playerId!==bettor))throw new Error('Place the pending bet before continuing');
   action=structuredClone(action);
   const state=structuredClone(input);
   if(action.type==='REQUEST_ITEM'||action.type==='USE_ITEM'){applyItem(state,action);assertInvariants(state);return state;}

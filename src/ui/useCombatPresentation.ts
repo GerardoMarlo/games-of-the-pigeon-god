@@ -1,9 +1,9 @@
 import { useEffect,useRef,useState } from 'react';
 import type { GameState } from '../engine/types';
-import { combatRecord,humanCombat,ROLL_ANIMATION_MS,COMBAT_RESULT_MS } from './combatPresentation';
+import { combatRecord,humanCombat,ROLL_ANIMATION_MS,COMBAT_RESULT_MS,rollingDice,type RollingDice } from './combatPresentation';
 export function useCombatPresentation(state:GameState,identity:object){
  const seen=useRef(state.eventLog.length),owner=useRef(identity);
- const [display,setDisplay]=useState<{state:GameState;rolling:boolean;result:boolean}|undefined>();
+ const [display,setDisplay]=useState<{state:GameState;rolling:boolean;result:boolean;rollingDice?:RollingDice}|undefined>();
  const [busy,setBusy]=useState(false);
  const [processed,setProcessed]=useState(state.eventLog.length);
  useEffect(()=>{
@@ -16,7 +16,7 @@ export function useCombatPresentation(state:GameState,identity:object){
   if(!rolled&&!result){setDisplay(undefined);setBusy(false);return;}
   const nextTrigger=result?state.eventLog.findIndex((e,i)=>i>from+resolvedOffset&&e.type==='COMBAT_TRIGGERED'):-1;
   const snapshot={...state,eventLog:nextTrigger>=0?state.eventLog.slice(0,nextTrigger):state.eventLog,phase:'COMBAT' as const,combat:structuredClone(record)};
-  setBusy(true);setDisplay({state:snapshot,rolling:rolled,result:false});
+  setBusy(true);setDisplay({state:snapshot,rolling:rolled,result:false,rollingDice:rollingDice(events)});
   let close:ReturnType<typeof setTimeout>|undefined;
   const reveal=()=>{setDisplay({state:snapshot,rolling:false,result});if(result)close=setTimeout(()=>{setDisplay(undefined);setBusy(false);},COMBAT_RESULT_MS);else{setDisplay(undefined);setBusy(false);}};
   const timer=setTimeout(reveal,rolled?ROLL_ANIMATION_MS:0);
@@ -24,5 +24,5 @@ export function useCombatPresentation(state:GameState,identity:object){
  },[state.eventLog.length,identity]);
  // Hide fresh results synchronously until the effect starts the animation.
  const pending=processed!==state.eventLog.length&&humanCombat(state,state.combat??combatRecord(state));
- return {display,busy:busy||pending};
+ return {display,busy:busy||pending,pendingDice:pending?rollingDice(state.eventLog.slice(seen.current)):undefined};
 }

@@ -82,3 +82,8 @@ Combat presentation and Cat push update
 September 14 owner correction — Arena-end Decrees and combat presentation
 All Decree conditions previously limited to the end of Round 5 now evaluate at the actual end of the Arena, including an early ending. Last Rat Standing, Wounded Survivor, Battered Survivor, Master of the Center and Take the Center keep their other conditions. Living eligibility and strict comparative ties are unchanged. This supersedes earlier Round-5-only card rulings.
 Human-involved combat uses a fixed translucent overlay, 650 ms presentation-only roll animation, and a three-second result display. Engine rolls/rerolls, confirmations, damage and legal actions remain authoritative. Gold marks successful dice; an independent ember outline marks currently legal Fervor rerolls. AI-only combat is not delayed by these presentation timers. Required pushback choices stay accessible in the overlay.
+
+Interaction correction — September 14, 2026
+Eligible eliminated players must place their public bet before play continues. At the next player-action/Cat-movement boundary, only the pending bettor may act; multiple bettors resolve in seat order. Finish the current combat and its displacement first. No bets are opened after an Arena has already ended.
+Human Attack and Dodge rolls remain explicit. Existing Fervor keeps the roll decision open until confirmation; animations affect only the dice rolled or the single die rerolled. After the result display, displacement choices are selected on highlighted Arena hexes.
+Combat displays the Arena and logs incoming Hits, cancellations and counter damage. Arena 2 Attack sixes yield two Hits: one Dodge five cancels one, leaving one damage. Arena 1 sixes yield one Hit.

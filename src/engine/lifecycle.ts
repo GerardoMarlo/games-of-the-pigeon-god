@@ -89,6 +89,10 @@ function startDuel(state:GameState):void {
   state.roundNumber=1;state.activePlayerId=state.turnOrder[0];delete state.combat;
   state.eventLog.push({type:'DUEL_STARTED',attempt:duel.attempt});beginPlacement(state);
 }
+export function pendingBettor(state:GameState):string|undefined {
+ if(state.finalDuel||!['PLAYER_ACTION','CAT_MOVEMENT'].includes(state.phase))return;
+ return state.seatOrder.find(id=>{const p=state.players[id];return p.eliminated&&p.eliminationRound!==undefined&&p.eliminationRound<=RULES.earlyBetLastRound&&!p.betTargetPlayerId&&Object.values(state.players).some(o=>o.id!==id&&o.currentRat.alive);});
+}
 export function lifecycleActions(state:GameState,playerId:string):GameAction[] {
   if(!state.players[playerId])return [];
   if(state.phase==='ARENA_END'&&playerId===state.activePlayerId)return [{type:'CONTINUE_ARENA',playerId}];

@@ -118,14 +118,18 @@ function finish(state:GameState,victimId:string,killerId:string):void {
 }
 function resolve(state:GameState,c:CombatState):void {
   const result=rollResult(c.attackerRoll,c.defenderRoll,state.finalDuel?1:state.arenaNumber);
+  let incomingHits=attackHits(c.attackerRoll,state.finalDuel?1:state.arenaNumber),cancellations=result.dodges;
   if(state.content){
     const ctx=state.content.combat!;
     const hits=ability(state,c.attackerId)==='twins_three'&&new Set(c.attackerRoll).size<c.attackerRoll.length?3:attackHits(c.attackerRoll,state.finalDuel?1:state.arenaNumber);
+    incomingHits=hits;
     const sixes=c.defenderRoll.filter(d=>d===6).length;
+    cancellations=ctx.cancelAttack?hits:result.dodges+(ability(state,c.defenderId)==='double_cancel'?sixes:0)+ctx.cancelHits;
     result.incoming=ctx.cancelAttack?0:Math.max(0,hits-result.dodges-(ability(state,c.defenderId)==='double_cancel'?sixes:0)-ctx.cancelHits);
     result.counter=sixes*(ability(state,c.defenderId)==='double_counter'?2:1);
     if(sixes&&state.content.players[c.defenderId]?.brasa){result.counter++;state.content.players[c.defenderId].brasa=false;}
   }
+  state.eventLog.push({type:'COMBAT_MATH',arena:state.finalDuel?1:state.arenaNumber,hits:incomingHits,canceled:Math.min(incomingHits,cancellations),counter:result.counter});
   c.attackerDamage=RULES.capDamageToHealth?Math.min(health(state,c.defenderId),result.incoming):result.incoming;
   c.defenderDamage=RULES.capDamageToHealth?Math.min(health(state,c.attackerId),result.counter):result.counter;
   // Both values are computed before either participant loses Health.
