@@ -26,7 +26,7 @@ export function evaluateAction(view:Observation,id:string,a:GameAction):number {
  if(a.type==='REQUEST_ITEM')return view.publicContent?.items[id].length? -10: p.actionsRemaining===1?8:2;
  if(a.type==='SKIP_EFFECT')return -10;
  if(to){
-  if(a.type==='PLACE_BURROW')return -distance(to,{q:0,r:0})+to.q*0.1;
+  if(a.type==='PLACE_BURROW')return 0; // Live setup uses engine-seeded random placement.
   const enemy=enemies.find(o=>distance(o.currentRat.position,to)===0);
   if(enemy&&a.type==='MOVE'){
    const expected=rat.attackDice*(view.arenaNumber===2?2/3:0.5)-((enemy.draftedRats.find(r=>r.id===enemy.currentRat.ratId)?.speed??1)/3);

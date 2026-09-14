@@ -155,3 +155,11 @@ export function simulateForAI(state:GameState,id:string,action:GameAction):Retur
  if(model.content){model.content.itemDeck.sort();model.content.decreeDeck.sort();}
  return getVisibleState(dispatch(model,action),id);
 }
+
+// Random setup choice stays inside the engine; AI never receives the RNG state.
+export function placeRandomBurrow(input:GameState,playerId:string):GameState {
+ const actions=getLegalActions(input,playerId).filter(a=>a.type==='PLACE_BURROW');
+ if(!actions.length)throw new Error('No legal Burrow placement');
+ const state=structuredClone(input);
+ return dispatch(state,actions[Math.floor(next(state.rng)*actions.length)]);
+}

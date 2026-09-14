@@ -700,3 +700,5 @@ Interaction correction — September 14, 2026
 Eligible eliminated players must place their public bet before play continues. At the next player-action/Cat-movement boundary, only the pending bettor may act; multiple bettors resolve in seat order. Finish the current combat and its displacement first. No bets are opened after an Arena has already ended.
 Human Attack and Dodge rolls remain explicit. Existing Fervor keeps the roll decision open until confirmation; animations affect only the dice rolled or the single die rerolled. After the result display, displacement choices are selected on highlighted Arena hexes.
 Combat displays the Arena and logs incoming Hits, cancellations and counter damage. Arena 2 Attack sixes yield two Hits: one Dodge five cancels one, leaving one damage. Arena 1 sixes yield one Hit.
+
+AI setup correction: AI Burrows are chosen uniformly from currently legal placements using the engine seeded RNG. There is no preferred side or forced spacing; adjacent placements remain possible by chance. Human placement and Arena 2 layout preservation are unchanged.

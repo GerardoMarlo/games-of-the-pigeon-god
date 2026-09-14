@@ -1,5 +1,5 @@
 import { describe,it,expect } from 'vitest';
-import { createGame,dispatch,getLegalActions,getVisibleState,simulateForAI,assertInvariants } from '../engine/game';
+import { createGame,dispatch,getLegalActions,getVisibleState,simulateForAI,assertInvariants,placeRandomBurrow } from '../engine/game';
 import { chooseAI } from './strategy';
 import { ratCards } from '../content/cards';
 import { finishArena } from '../engine/lifecycle';
@@ -24,10 +24,28 @@ it('AI completes 1,000 seeded Matches using only engine-legal decisions',async()
    const id=all.find(a=>!['USE_ITEM','SELECT_BET'].includes(a.type))?.playerId??all[0].playerId;
    const legal=all.filter(a=>a.playerId===id);
    const action=chooseAI(getVisibleState(state,id),id,legal,a=>simulateForAI(state,id,a));
-   expect(legal).toContainEqual(action);state=dispatch(state,action);assertInvariants(state);
+   expect(legal).toContainEqual(action);state=action.type==='PLACE_BURROW'?placeRandomBurrow(state,id):dispatch(state,action);assertInvariants(state);
    // Retaining bounded log history speeds stress tests; no rule depends on past log text.
    state.eventLog=state.eventLog.slice(-30);
   }
   expect(state.phase,`unfinished seed ${seed}`).toBe('MATCH_END');
  }
 },300000);
+
+it('AI Burrows sample legal locations reproducibly without a directional preference',()=>{
+ const selected=new Set<string>();
+ for(let seed=0;seed<80;seed++){
+  const c=createController({seed,playerCount:4,mode:'ai'});
+  while(c.getState().phase==='ARENA_SETUP'){
+   const before=c.getState(),id=before.activePlayerId;
+   if(id==='p1'){c.dispatch(c.getLegalActions()[0]);continue;}
+   const expected=placeRandomBurrow(before,id);
+   expect(c.aiStep()).toBe(true);expect(c.getState()).toEqual(expected);
+   const position=c.getState().players[id].currentRat.position;
+   expect(getLegalActions(before,id)).toContainEqual({type:'PLACE_BURROW',playerId:id,destination:position});
+   selected.add(`${position.q},${position.r}`);
+   expect(placeRandomBurrow(before,id)).toEqual(expected);
+  }
+ }
+ expect(selected.size).toBeGreaterThan(12);
+});
