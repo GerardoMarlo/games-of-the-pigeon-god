@@ -122,8 +122,10 @@ export function settle(input:GameState):GameState {
   }else if(state.combat){
    const stage=state.combat.stage;
    if(stage==='PUSHBACK'&&all.filter(a=>a.type==='SELECT_PUSHBACK').length===1)type='SELECT_PUSHBACK';
-   const relevant=stage==='BEFORE_ATTACK'?['aguja','red']:stage==='ATTACK_RESPONSE'?['arena']:stage==='BEFORE_DODGE'?['pluma']:stage==='AFTER_DAMAGE'?['clavo','hueso']:undefined;
-   if(relevant&&!all.some(a=>a.type==='USE_ITEM'&&relevant.includes(a.itemId)))type=stage==='BEFORE_ATTACK'?'ROLL_ATTACK':stage==='ATTACK_RESPONSE'?'ACCEPT_ATTACK':stage==='BEFORE_DODGE'?'ROLL_DODGE':'RESOLVE_COMBAT';
+   // Human/AI Rats explicitly roll; only the neutral Cat rolls automatically.
+   if(stage==='BEFORE_ATTACK'&&state.combat.attackerId==='cat')type='ROLL_ATTACK';
+   const relevant=stage==='ATTACK_RESPONSE'?['arena']:stage==='AFTER_DAMAGE'?['clavo','hueso']:undefined;
+   if(relevant&&!all.some(a=>a.type==='USE_ITEM'&&relevant.includes(a.itemId)))type=stage==='ATTACK_RESPONSE'?'ACCEPT_ATTACK':'RESOLVE_COMBAT';
    if(['ATTACK','DODGE'].includes(stage)&&!all.some(a=>a.type==='SPEND_FERVOR'||a.type==='USE_ABILITY'||a.type==='USE_ITEM'&&a.playerId===(stage==='ATTACK'?state.combat!.attackerId:state.combat!.defenderId)))type=stage==='ATTACK'?'CONFIRM_ATTACK':'CONFIRM_DODGE';
   }else if(state.phase==='PLAYER_ACTION'&&p.actionsRemaining===0&&!p.currentRat.inBurrow&&!(state.content?.players[id].items.length))type='END_TURN';
   else if(state.phase==='CONTENT_EFFECT'&&!all.some(a=>['EFFECT_MOVE','EFFECT_ACTION_MOVE','EFFECT_REQUEST_ITEM'].includes(a.type)))type='SKIP_EFFECT';

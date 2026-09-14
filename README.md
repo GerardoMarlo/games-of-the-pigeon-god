@@ -45,4 +45,6 @@ Tests retain the earlier engine regressions in explicit card-free fixtures and a
 
 The Cat rolls four Attack dice. Arena 2 preserves the exact Arena 1 terrain and Burrows. Active card names and descriptions are English; Swift, Warrior, Murmillo and Thracian Rat are excluded for rework along with the two earlier Gold/Oro cards.
 
-Zero Actions and no Items ends the Turn immediately. Equipped Items give human players a visible four-second window. Legal Item use cancels the previous timer, and bonus effects finish before Turn advance. AI uses only public state, its own Rats, legal actions and shallow engine simulations with hidden information removed. Hard AI remains a later milestone.
+Zero Actions and no Items ends the Turn immediately. Equipped Items give human players a visible five-second window. Legal Item use cancels the previous timer, and bonus effects finish before Turn advance. AI uses only public state, its own Rats, legal actions and shallow engine simulations with hidden information removed. Hard AI remains a later milestone.
+
+Roll-button clarification: Rats explicitly click Roll Attack and Roll Dodge. Applicable pre-roll Items are offered alongside that roll button, without an extra preparation confirmation. After rolling, continue automatically unless a legal Item, ability or Fervor decision remains. The neutral Cat rolls automatically.

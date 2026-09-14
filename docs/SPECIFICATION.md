@@ -153,6 +153,8 @@ Rulebook v1.6 section 56 governs the card implementation. Card-granted Actions/m
 
 ## Milestone 6 owner changes
 
-Milestone 6 implements balanced heuristic AI with shallow public-state simulations and a live local/AI toggle. No Hard opponent-response layer is claimed yet. Automatic settlement skips noninteractive roll, Cat and displacement steps; applicable Item/ability/Fervor decisions still pause. Human exhausted Turns end immediately without Items, or after a cancellable four-second Item window. Wall-clock timing lives in the controller/UI, not the deterministic reducer.
+Milestone 6 implements balanced heuristic AI with shallow public-state simulations and a live local/AI toggle. No Hard opponent-response layer is claimed yet. Automatic settlement skips noninteractive roll, Cat and displacement steps; applicable Item/ability/Fervor decisions still pause. Human exhausted Turns end immediately without Items, or after a cancellable five-second Item window. Wall-clock timing lives in the controller/UI, not the deterministic reducer.
 
 Cat Attack is now four dice. Arena 2 reuses Arena 1's complete terrain, Cat spawn and Burrows. Active cards are translated into English. Retire Swift, Warrior, Murmillo and Thracian Rat for rework, retaining 14 active Rats. Keep the two Oro/Gold cards excluded. Damage logs include remaining Health. Rulebook v1.6 sections 56–57 supersede the earlier wording.
+
+Roll-button clarification: Rats explicitly click Roll Attack and Roll Dodge. Applicable pre-roll Items are offered alongside that roll button, without an extra preparation confirmation. After rolling, continue automatically unless a legal Item, ability or Fervor decision remains. The neutral Cat rolls automatically.

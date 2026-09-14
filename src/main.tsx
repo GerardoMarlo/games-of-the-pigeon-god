@@ -22,7 +22,7 @@ function App() {
     const ai=setTimeout(()=>{try{controller.aiStep();}catch(e){setError(String(e));}},500);
     const p=state.players[state.activePlayerId];let timer:ReturnType<typeof setTimeout>|undefined,interval:ReturnType<typeof setInterval>|undefined;
     if(state.phase==='PLAYER_ACTION'&&p.actionsRemaining===0&&!p.currentRat.inBurrow&&p.controller==='human'){
-      setCountdown(4);interval=setInterval(()=>setCountdown(n=>n===undefined?undefined:Math.max(0,n-1)),1000);timer=setTimeout(()=>controller.expireTurn(revision),4000);
+      setCountdown(5);interval=setInterval(()=>setCountdown(n=>n===undefined?undefined:Math.max(0,n-1)),1000);timer=setTimeout(()=>controller.expireTurn(revision),5000);
     }else setCountdown(undefined);
     return ()=>{clearTimeout(ai);if(timer)clearTimeout(timer);if(interval)clearInterval(interval);};
   },[controller,revision]);
