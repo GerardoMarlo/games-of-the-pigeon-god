@@ -2,7 +2,7 @@
 
 Single-player tactical board game prototype. Original title: Los Juegos del Dios Palomo.
 
-## Completed: Milestones 1–6
+## Completed: Milestones 1–7
 
 React, strict TypeScript and Vite with a deterministic engine independent of the UI. Hex movement, Rat combat, the Cat, both Arenas, scoring, bets and Final Duels are implemented. Milestone 5 adds **14 supplied Rats with abilities, 17 Items, and 19 public Decrees**.
 
@@ -48,3 +48,9 @@ The Cat rolls four Attack dice. Arena 2 preserves the exact Arena 1 terrain and 
 Zero Actions and no Items ends the Turn immediately. Equipped Items give human players a visible five-second window. Legal Item use cancels the previous timer, and bonus effects finish before Turn advance. AI uses only public state, its own Rats, legal actions and shallow engine simulations with hidden information removed. Hard AI remains a later milestone.
 
 Roll-button clarification: Rats explicitly click Roll Attack and Roll Dodge. Applicable pre-roll Items are offered alongside that roll button, without an extra preparation confirmation. After rolling, continue automatically unless a legal Item, ability or Fervor decision remains. The neutral Cat rolls automatically.
+
+## Milestone 7 — illustrated playable UI
+
+The supplied board tiles, Burrows, resource tokens and card illustrations now appear in the playable interface. Divine Favor displays as a circular medallion. The UI includes Rat HUDs and trackers, four public Decrees, equipped Item descriptions, explicit Attack/Dodge controls, legal approach previews, a readable event chronicle, movement transitions and reduced-motion support. Local/AI mode and 2–4-player setup remain available through Match settings.
+
+The rules engine is unchanged. See [artwork provenance](docs/reference/ARTWORK.md). Full drafting, save/resume and Hard AI remain pending.

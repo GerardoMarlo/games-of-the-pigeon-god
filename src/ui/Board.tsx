@@ -1,27 +1,24 @@
+import { useState } from 'react';
 import { key } from '../engine/hex';
 import type { GameAction,GameState } from '../engine/types';
-interface Props {state:GameState;actions:GameAction[];send:(a:GameAction)=>void}
-const points='0,-27 24,-14 24,14 0,27 -24,14 -24,-14';
-export function Board({state,actions,send}:Props){
-  const seats=state.finalDuel?.stage==='combat'?state.turnOrder:state.seatOrder;
-  const count=Object.keys(state.board.hexes).length;
-  const candidates=actions.filter((a):a is Extract<GameAction,{type:'PLACE_BURROW'}>=>a.type==='PLACE_BURROW'&&!state.board.hexes[key(a.destination)]);
-  const tiles=[...Object.values(state.board.hexes),...candidates.map(a=>({coordinate:a.destination,terrain:'normal' as const}))];
-  return <section><svg viewBox="-210 -175 420 350" aria-label={`${count}-hex Arena with one-way Burrows`}>
-    {tiles.map(tile=>{
-      const {q,r}=tile.coordinate;
-      const action=actions.find(a=>(a.type==='MOVE'||a.type==='EFFECT_ACTION_MOVE')&&key(a.path[a.path.length-1])===key(tile.coordinate)||(a.type==='SELECT_PUSHBACK'||a.type==='PLACE_BURROW'||a.type==='EFFECT_MOVE')&&key(a.destination)===key(tile.coordinate));
-      const rat=Object.values(state.players).find(p=>p.currentRat.alive&&!p.currentRat.inBurrow&&key(p.currentRat.position)===key(tile.coordinate));
-      const cat=state.cat.alive&&!state.cat.offBoard&&key(state.cat.position)===key(tile.coordinate);
-      const label=rat?rat.id.toUpperCase():cat?'CAT':tile.terrain==='normal'?'':tile.terrain.toUpperCase();
-      const activate=()=>{if(action)send(action);};
-      return <g data-arena-hex={state.board.hexes[key(tile.coordinate)]?'':undefined} key={key(tile.coordinate)} transform={`translate(${48*(q+r/2)},${42*r})`} role="button" tabIndex={action?0:-1} aria-disabled={!action} aria-label={`${q},${r} ${label}${action?' legal move':''}`} onClick={activate} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activate();}}}>
-        <polygon className={`${tile.terrain} ${action?'legal':''}`} points={points}/><text textAnchor="middle" dy="4">{label}</text>
-      </g>;
-    })}
-    {state.board.burrows?.slice(0,seats.length).map((b,i)=>{
-      const {q,r}=b.position,p=state.players[b.playerId??seats[i]],occupant=Object.values(state.players).find(p=>p.currentRat.alive&&p.currentRat.inBurrow&&key(p.currentRat.position)===key(b.position)),present=!!occupant;
-      return <g key={key(b.position)} data-burrow transform={`translate(${48*(q+r/2)},${42*r})`} aria-label={`${p.id} Burrow${present?' occupied':' empty'}`}><polygon points={points} className="burrow"/><text textAnchor="middle" dy="-3">{p.id.toUpperCase()}</text><text textAnchor="middle" dy="9">{present?`${occupant!.id.toUpperCase()} IN BURROW`:'BURROW'}</text></g>;
-    })}
-  </svg><p>{count} Arena hexes; Burrows {count===19?'sit outside the perimeter':'occupy outer-ring hexes'}. Exit on your first Turn. You cannot voluntarily end a Turn in your Burrow. An entrance occupied by a Rat or the Cat starts combat; a failed attack returns you to retry next Turn.</p><p>Combat costs two Actions. Card-granted Actions or movement may continue after displacement.</p></section>;
+import { colors,burrows } from './Art';
+import { suppliedRatCards } from '../content/cards';
+interface Props {state:GameState;actions:GameAction[];send:(a:GameAction)=>void;selected:string;onSelect:(id:string)=>void}
+const points='0,-27 23.38,-13.5 23.38,13.5 0,27 -23.38,13.5 -23.38,-13.5';
+const pos=({q,r}:{q:number;r:number})=>({x:47*(q+r/2),y:40.5*r});
+export function Board({state,actions,send,selected,onSelect}:Props){
+ const [hover,setHover]=useState<GameAction>();const candidates=actions.filter((a):a is Extract<GameAction,{type:'PLACE_BURROW'}>=>a.type==='PLACE_BURROW'&&!state.board.hexes[key(a.destination)]);
+ const tiles=[...Object.values(state.board.hexes),...candidates.map(a=>({coordinate:a.destination,terrain:'normal' as const}))];
+ const visiblePlayers=Object.values(state.players).filter(p=>p.currentRat.alive&&(!state.burrowPlacement||state.burrowPlacement.placed.includes(p.id)));
+ const path=hover&&actions.some(a=>JSON.stringify(a)===JSON.stringify(hover))&&(hover.type==='MOVE'||hover.type==='EFFECT_ACTION_MOVE')?[state.players[hover.playerId].currentRat.position,...hover.path]:[];
+ return <section className="arena-board"><svg viewBox={Object.keys(state.board.hexes).length===19&&!state.burrowPlacement?"-175 -140 350 280":"-205 -175 410 350"} aria-label={`${Object.keys(state.board.hexes).length}-hex Arena with one-way Burrows`}><defs><clipPath id="tile-clip"><polygon points={points}/></clipPath><clipPath id="rat-clip"><circle r="16"/></clipPath></defs>
+ {tiles.map(tile=>{const h=tile.coordinate,{x,y}=pos(h);const burrow=state.board.burrows?.find(b=>key(b.position)===key(h));const action=actions.find(a=>(a.type==='MOVE'||a.type==='EFFECT_ACTION_MOVE')&&key(a.path[a.path.length-1])===key(h)||(['SELECT_PUSHBACK','PLACE_BURROW','EFFECT_MOVE'].includes(a.type)&&'destination'in a&&a.destination&&key(a.destination)===key(h)));const occupant=visiblePlayers.find(p=>key(p.currentRat.position)===key(h));const target=!!action&&(!!occupant||state.cat.alive&&!state.cat.offBoard&&key(state.cat.position)===key(h));const terrain=tile.terrain;const label=`${h.q},${h.r} ${burrow?'Burrow':terrain}${occupant?' '+occupant.id.toUpperCase():''}${action?' legal move':''}`;
+ return <g key={key(h)} transform={`translate(${x},${y})`} role="button" tabIndex={action||occupant?0:-1} aria-disabled={!action} aria-label={label} data-arena-hex={state.board.hexes[key(h)]?'':undefined} onMouseEnter={()=>setHover(action)} onMouseLeave={()=>setHover(undefined)} onFocus={()=>setHover(action)} onClick={()=>action?send(action):occupant&&onSelect(occupant.id)} onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();if(action)send(action);else if(occupant)onSelect(occupant.id);}}}>
+ <polygon points={points} className={state.board.hexes[key(h)]?"tile-base":"placement-base"}/><g clipPath="url(#tile-clip)"><image href={`/art/${terrain==='center'?`center-${state.arenaNumber}`:terrain==='sewer'?'sewer':'land'}.webp`} x="-28" y="-28" width="56" height="56" preserveAspectRatio="none" transform="rotate(30)"/>{burrow&&<image href={`/art/burrow-${burrows[state.seatOrder.indexOf(burrow.playerId!)]??'red'}.webp`} x="-39" y="-39" width="78" height="78"/>}{['rock','crate'].includes(terrain)&&<image href={`/art/${terrain}.webp`} x="-21" y="-21" width="42" height="42"/>}</g><polygon points={points} className={`tile-outline ${action?'legal':''} ${target?'target':''}`}/>{terrain==='sewer'&&<text y="19" textAnchor="middle" className="tile-label">SEWER</text>}
+ </g>;})}
+ {state.board.burrows?.filter(b=>!state.board.hexes[key(b.position)]).map(b=>{const {x,y}=pos(b.position),i=state.seatOrder.indexOf(b.playerId!);return <g key={key(b.position)} transform={`translate(${x},${y})`} aria-label={`${b.playerId} Burrow`}><g clipPath="url(#tile-clip)"><image href={`/art/burrow-${burrows[i]}.webp`} x="-39" y="-39" width="78" height="78"/></g><polygon points={points} className="tile-outline"/></g>;})}
+ {path.length>0&&<polyline points={path.map(h=>{const p=pos(h);return `${p.x},${p.y}`;}).join(' ')} className="movement-path"/>}
+ {visiblePlayers.map(p=>{const {x,y}=pos(p.currentRat.position),index=suppliedRatCards.findIndex(r=>r.id===p.currentRat.ratId);return <g key={p.id} className="rat-token" style={{transform:`translate(${x}px,${y}px)`}} pointerEvents="none"><circle r={p.id===selected?19:17} fill={colors[state.seatOrder.indexOf(p.id)]} stroke={p.id===state.activePlayerId?'#fff4cb':'#29251f'} strokeWidth="2"/><g clipPath="url(#rat-clip)"><svg x="-16" y="-16" width="32" height="32" viewBox={`${index%10*600+85} ${Math.floor(index/10)*840+190} 430 430`}><image href="/art/rats.webp" width="6000" height="5880"/></svg></g><rect x="-14" y="12" width="28" height="10" rx="4" fill="#172723"/><text y="19" textAnchor="middle">{p.id.toUpperCase()} · {p.currentRat.health}♥</text></g>;})}
+ {state.cat.alive&&!state.cat.offBoard&&!state.finalDuel&&<g className="rat-token" style={{transform:`translate(${pos(state.cat.position).x}px,${pos(state.cat.position).y}px)`}} pointerEvents="none"><image href="/art/cat.webp" x="-21" y="-27" width="42" height="46"/><text textAnchor="middle" y="23" className="tile-label">CAT · {state.cat.health}♥</text></g>}
+ </svg><div className="board-legend"><span>● Legal destination</span><span>━ Approach path</span><span>◆ Combat costs 2 Actions</span></div></section>;
 }
