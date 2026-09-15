@@ -64,4 +64,4 @@ Pending upload failure is visible but never blocks play. Closing the browser, de
 
 ## Verification
 
-218 engine/UI tests pass, including 1,000 complete legal-AI Matches. The separate reporting dataset contains another 1,000 seeded complete Matches. API tests exercise ownership, idempotency and deletion; a 30-Match contract check validates actual engine events and summaries against server validation. Production builds omit development seed/debug controls.
+218 engine/UI tests pass, including 1,000 complete legal-AI Matches. The separate reporting dataset contains another 1,000 seeded complete Matches, reproduced exactly after normalizing version fingerprints across Windows/Linux. Five API tests exercise registration, ownership, idempotency and deletion; a 30-Match contract check validates actual engine events and summaries against server validation. Browser checks cover consent, returning profiles, upload ordering, defaults and 1440/820/390-pixel layouts. A live synthetic profile/Match test verified central upload and deletion, with cleanup confirmed in D1. Production checks verified assets, refresh and omitted development seed/debug controls.
