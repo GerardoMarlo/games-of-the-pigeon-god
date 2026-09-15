@@ -16,7 +16,7 @@ export function qualifies(state:GameState,id:string,card:DecreeCard):boolean {
 }
 export function restockDecrees(state:GameState):void {
  const c=state.content;if(!c||state.finalDuel)return;
- while(c.decrees.length<4&&c.decreeDeck.length)c.decrees.push(c.decreeDeck.shift()!);
+ while(c.decrees.length<4&&c.decreeDeck.length){const cardId=c.decreeDeck.shift()!;c.decrees.push(cardId);state.eventLog.push({type:'DECREE_REVEALED',cardId});}
 }
 export function claimDecrees(state:GameState,timing:'immediate'|'end_of_arena'):void {
  const c=state.content;if(!c||state.finalDuel)return;

@@ -35,7 +35,7 @@ function roll(state:GameState,playerId:string,kind:'ATTACK'|'DODGE'):number[] {
 export function startCombat(state:GameState,defenderId:string,sourceHex:HexCoordinate,destinationHex:HexCoordinate,options?:{origin:'cat_turn'|'cat_respawn'|'cat_push';resume:'actions'|'end_turn';direction?:HexCoordinate;catCreditPlayerId?:string;catPushWinnerId?:string}):void {
   const attackerId=options?'cat':state.activePlayerId;
   state.combat={attackerId,defenderId,sourceHex,destinationHex,stage:'ATTACK',attackerRoll:[],defenderRoll:[],attackerConfirmed:false,defenderConfirmed:false,attackerDamage:0,defenderDamage:0,origin:options?.origin??'rat_move',resume:options?.resume??'end_turn',direction:options?.direction,catCreditPlayerId:options?.catCreditPlayerId,catPushWinnerId:options?.catPushWinnerId};
-  if(!options)state.players[attackerId].actionsRemaining=Math.max(0,state.players[attackerId].actionsRemaining-1);
+  if(!options){state.players[attackerId].actionsRemaining=Math.max(0,state.players[attackerId].actionsRemaining-1);state.eventLog.push({type:'ACTION_SPENT',playerId:attackerId,amount:1,bonus:false});}
   state.phase='COMBAT';state.eventLog.push({type:'COMBAT_TRIGGERED',attackerId,defenderId},{type:'PHASE_CHANGED',phase:'COMBAT'});
   if(state.content){state.content.combat={attackDice:0,dodgeDice:0,cancelHits:0,cancelAttack:false,attackAbilityUsed:false,dodgeAbilityUsed:false};state.combat.stage='BEFORE_ATTACK';return;}
   state.combat.attackerRoll=roll(state,attackerId,'ATTACK');
@@ -79,7 +79,7 @@ function tracker(state:GameState,p:PlayerState,kind:'attacks'|'dodges'|'finishes
   const before=p[kind];p[kind]+=amount;state.eventLog.push({type:'TRACKER_CHANGED',playerId:p.id,tracker:kind,amount});
   const milestones=kind==='attacks'?RULES.attackFervorMilestones:kind==='dodges'?RULES.dodgeFervorMilestones:[RULES.finishFervorMilestone];
   for(const threshold of milestones)if(before<threshold && p[kind]>=threshold)fervor(state,p,1,`${kind} milestone ${threshold}`);
-  if(!state.finalDuel&&kind==='finishes' && before<RULES.finishFavorMilestone && p.finishes>=RULES.finishFavorMilestone){p.divineFavor++;state.eventLog.push({type:'FAVOR_CHANGED',playerId:p.id,amount:1});}
+  if(!state.finalDuel&&kind==='finishes' && before<RULES.finishFavorMilestone && p.finishes>=RULES.finishFavorMilestone){p.divineFavor++;state.eventLog.push({type:'FAVOR_CHANGED',playerId:p.id,amount:1,source:'milestone'});}
 }
 function displace(state:GameState,playerId:string,to:HexCoordinate,reason:'pushback'|'retreat'|'capture'):void {
   if(playerId==='cat'){state.cat.position={...to};state.cat.offBoard=false;}else {state.players[playerId].currentRat.position={...to};state.players[playerId].currentRat.inBurrow=isBurrow(state,to);if(isBurrow(state,to)&&reason==='pushback')state.players[playerId].currentRat.forcedBurrow=true;}state.eventLog.push({type:'DISPLACED',playerId,to:{...to},reason});
@@ -112,7 +112,7 @@ function finish(state:GameState,victimId:string,killerId:string):void {
     state.eventLog.push({type:'RAT_FINISHED',playerId:victimId,sourceId:killerId});
     const credit=state.combat?.catCreditPlayerId;
     if(killerId==='cat' && credit && victimId!==credit){
-      state.players[credit].divineFavor+=RULES.eliminatedCatFinishFavor;state.eventLog.push({type:'FAVOR_CHANGED',playerId:credit,amount:RULES.eliminatedCatFinishFavor});
+      state.players[credit].divineFavor+=RULES.eliminatedCatFinishFavor;state.eventLog.push({type:'FAVOR_CHANGED',playerId:credit,amount:RULES.eliminatedCatFinishFavor,source:'eliminated_cat'});
     }
   }
 }

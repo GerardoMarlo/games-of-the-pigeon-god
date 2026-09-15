@@ -6,3 +6,11 @@ coverage/
 *.local.png
 
 /marlo-play/
+
+backend/dist/
+.simulation-build/
+simulation-results/
+exports/
+report-runtime/
+
+*.local.ts

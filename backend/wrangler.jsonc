@@ -1,0 +1,26 @@
+{
+  "name": "pigeongod-api",
+  "main": "dist/worker.mjs",
+  "compatibility_date": "2026-09-14",
+  "workers_dev": false,
+  "preview_urls": false,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "pigeongod-data",
+      "database_id": "ec91c3cb-4e94-4056-bad8-bfb266eb85c4",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "triggers": {
+    "crons": [
+      "0 5 * * *"
+    ]
+  },
+  "observability": {
+    "enabled": false
+  },
+  "vars": {
+    "TURNSTILE_SITE_KEY": "0x4AAAAAAE1Ey-67eO6y0xp4"
+  }
+}

@@ -10,19 +10,19 @@ export type HexTerrain = 'normal'|'rock'|'crate'|'sewer'|'spawn'|'center';
 export interface HexState { coordinate:HexCoordinate; terrain:HexTerrain; sewerId?:string }
 export interface BoardState { hexes:Record<string,HexState>; spawns:HexCoordinate[]; catSpawn:HexCoordinate; burrows?:{position:HexCoordinate;entry:HexCoordinate;playerId?:PlayerId}[] }
 export interface CombatState { attackerId:string; defenderId:string; sourceHex:HexCoordinate; destinationHex:HexCoordinate; stage:'CAT_RETREAT'|'AFTER_DAMAGE'|'BEFORE_ATTACK'|'ATTACK_RESPONSE'|'BEFORE_DODGE'|'ATTACK'|'DODGE'|'PUSHBACK'; attackerRoll:number[]; defenderRoll:number[]; attackerConfirmed:boolean; defenderConfirmed:boolean; attackerDamage:number; defenderDamage:number; winnerId?:string; origin?:'rat_move'|'cat_turn'|'cat_respawn'|'cat_push'; resume?:'actions'|'end_turn'; direction?:HexCoordinate; catCreditPlayerId?:string;catPushWinnerId?:string }
-export type GameEvent = {type:'COMBAT_MATH';arena:1|2;hits:number;canceled:number;counter:number} | {type:'DECREE_CLAIMED';playerId:string;cardId:string;name:string;reward:number;slot:number} | {type:'CONTENT';message:string} | {type:'BURROW_PLACED';playerId:PlayerId;position:HexCoordinate} | { type:'PHASE_CHANGED'; phase:GamePhase } | { type:'RAT_MOVED'; playerId:string; from:HexCoordinate; to:HexCoordinate; cost:number } | { type:'COMBAT_TRIGGERED'; attackerId:string; defenderId:string }
+export type GameEvent = {type:'OBSERVATION';kind:'segment_start'|'segment_end'|'turn_start'|'mode';reason:string;arena:1|2;round:number;duel:number;active:string;players:{id:string;ratId:string;controller:'human'|'ai';health:number;favor:number}[]} | {type:'ITEM_DRAWN'|'ITEM_USED'|'ITEM_DISCARDED';playerId:string;cardId:string} | {type:'DECREE_REVEALED';cardId:string} | {type:'ACTION_SPENT';playerId:string;amount:number;bonus:boolean} | {type:'COMBAT_MATH';arena:1|2;hits:number;canceled:number;counter:number} | {type:'DECREE_CLAIMED';playerId:string;cardId:string;name:string;reward:number;slot:number} | {type:'CONTENT';message:string} | {type:'BURROW_PLACED';playerId:PlayerId;position:HexCoordinate} | { type:'PHASE_CHANGED'; phase:GamePhase } | { type:'RAT_MOVED'; playerId:string; from:HexCoordinate; to:HexCoordinate; cost:number } | { type:'COMBAT_TRIGGERED'; attackerId:string; defenderId:string }
   | {type:'ROLL';playerId:string;kind:'ATTACK'|'DODGE';dice:number[]}
   | {type:'REROLL';playerId:string;kind:'ATTACK'|'DODGE';index:number;before:number;after:number}
   | {type:'ROLL_CONFIRMED';playerId:string;kind:'ATTACK'|'DODGE'}
   | {type:'DAMAGE';sourceId:string;targetId:string;amount:number;healthRemaining?:number}
   | {type:'FERVOR_CHANGED';playerId:string;amount:number;reason:string}
   | {type:'TRACKER_CHANGED';playerId:string;tracker:'attacks'|'dodges'|'finishes';amount:number}
-  | {type:'FAVOR_CHANGED';playerId:string;amount:number}
+  | {type:'FAVOR_CHANGED';playerId:string;amount:number;source?:'arena'|'bet'|'milestone'|'eliminated_cat'}
   | {type:'RAT_FINISHED';playerId:string;sourceId:string}
   | {type:'COMBAT_RESOLVED';attackerDamage:number;defenderDamage:number;winnerId:string}
   | {type:'DISPLACED';playerId:string;to:HexCoordinate;reason:'pushback'|'retreat'|'capture'}
   | {type:'CAT_MOVED';chosenBy?:string;die:number;from:HexCoordinate;to:HexCoordinate;blocked:boolean}
-  | {type:'CAT_RESPAWNED';health:number;occupied:boolean}
+  | {type:'CAT_RESPAWNED';health:number;occupied:boolean;reason?:'finished'|'out_of_bounds'}
   | {type:'CAT_FINISHED';sourceId:string}
   | {type:'ARENA_STARTED';arenaNumber:1|2}
   | {type:'BET_PLACED';playerId:string;targetId:string}

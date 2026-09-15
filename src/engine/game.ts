@@ -1,3 +1,4 @@
+import { observe } from './observation';
 import { assertContent } from './content/validation';
 import { ratCards } from '../content/cards';
 import { initializeContent } from './content/state';
@@ -53,6 +54,8 @@ export function createGame(config:GameConfig):GameState {
   const roster=config.content===false?prototypeRats:shuffle(rng,ratCards.map(r=>({...r,artwork:''})));
   ids.forEach((id,i)=>{const cards=structuredClone(roster.slice(i*2,i*2+2));state.players[id]={id,controller:config.mode==='ai'&&i!==0?'ai':'human',divineFavor:0,draftedRats:cards,currentRat:{ratId:cards[0].id,ownerId:id,health:cards[0].maxHealth,position:{...(board.spawns[i]??board.catSpawn)},alive:true,inBurrow:!config.board||!board.hexes[key(board.spawns[i])]},eliminated:false,attacks:0,dodges:0,finishes:0,fervor:0,actionsRemaining:0};});
   if(config.content!==false)state.content=initializeContent(state);
+  observe(state,'segment_start');
+  for(const cardId of state.content?.decrees??[])state.eventLog.push({type:'DECREE_REVEALED',cardId});
   if(config.board){phase(state,'ROUND_START');beginTurn(state);}else beginPlacement(state);assertInvariants(state);return settle(state);
 }
 export function getLegalActions(state:GameState,playerId:string):GameAction[] {
@@ -98,7 +101,7 @@ function dispatchRaw(input:GameState,action:GameAction):GameState {
   const player=state.players[action.playerId];
   if(action.type==='MOVE') {
     const steps=traceMovement(state,action.playerId,action.path);
-    player.actionsRemaining--;
+    player.actionsRemaining--;state.eventLog.push({type:'ACTION_SPENT',playerId:player.id,amount:1,bonus:false});
     if(state.content)state.content.players[player.id].afterMovement=false;
 
     for(const step of steps) {

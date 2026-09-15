@@ -37,8 +37,9 @@ export function applyEffect(state:GameState,action:GameAction):void {
  if(action.type==='SKIP_EFFECT')c.effects.shift();
  else if(action.type==='EFFECT_REQUEST_ITEM'){
   const preview=actionPreview(state,action.playerId);applyItem(preview,{type:'REQUEST_ITEM',playerId:action.playerId});
-  c.itemDeck=preview.content!.itemDeck;c.players[action.playerId].items=preview.content!.players[action.playerId].items;state.eventLog=preview.eventLog;c.effects.shift();
+  c.itemDeck=preview.content!.itemDeck;c.players[action.playerId].items=preview.content!.players[action.playerId].items;state.eventLog=preview.eventLog;const spent=state.eventLog.slice().reverse().find(e=>e.type==='ACTION_SPENT');if(spent?.type==='ACTION_SPENT')spent.bonus=true;c.effects.shift();
  }else if(action.type==='EFFECT_ACTION_MOVE'){
+  state.eventLog.push({type:'ACTION_SPENT',playerId:action.playerId,amount:1,bonus:true});
   const steps=traceMovement(actionPreview(state,action.playerId),action.playerId,action.path);
   const p=state.players[action.playerId];for(const step of steps){const from={...p.currentRat.position};p.currentRat.position={...step.to};p.currentRat.inBurrow=false;state.eventLog.push({type:'RAT_MOVED',playerId:p.id,from,to:step.to,cost:step.cost});}
   c.players[p.id].moved=true;c.effects.shift();

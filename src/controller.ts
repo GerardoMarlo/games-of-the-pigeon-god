@@ -1,21 +1,23 @@
+import { observe } from './engine/observation';
 import { createGame,dispatch,getLegalActions,getVisibleState,simulateForAI,placeRandomBurrow } from './engine/game';
 import { chooseAI } from './ai/strategy';
 import type { GameAction,GameConfig } from './engine/types';
 export function createController(config:GameConfig) {
  let state=createGame(config),revision=0;
+ const decisions:unknown[]=[];
  const listeners=new Set<()=>void>();
- const send=(action:GameAction)=>{state=dispatch(state,action);revision++;listeners.forEach(fn=>fn());};
+ const send=(action:GameAction)=>{state=dispatch(state,action);decisions.push(structuredClone(action));revision++;listeners.forEach(fn=>fn());};
  const all=()=>Object.keys(state.players).flatMap(id=>getLegalActions(state,id));
  return {
-  getState:()=>structuredClone(state),getRevision:()=>revision,
+  getState:()=>structuredClone(state),getDecisions:()=>structuredClone(decisions),getRevision:()=>revision,
   getLegalActions:()=>all().filter(a=>state.players[a.playerId].controller==='human'),
   dispatch:send,
-  setMode:(mode:'local'|'ai')=>{state.mode=mode;for(const p of Object.values(state.players))p.controller=mode==='ai'&&p.id!=='p1'?'ai':'human';revision++;listeners.forEach(fn=>fn());},
+  setMode:(mode:'local'|'ai')=>{state.mode=mode;for(const p of Object.values(state.players))p.controller=mode==='ai'&&p.id!=='p1'?'ai':'human';decisions.push({type:'MODE',mode});observe(state,'mode');revision++;listeners.forEach(fn=>fn());},
   aiStep:()=>{
    const actions=all(),mandatory=actions.find(a=>!['USE_ITEM','SELECT_BET'].includes(a.type));
    const id=mandatory?.playerId??actions[0]?.playerId;
    if(!id||state.players[id].controller!=='ai')return false;
-   const legal=actions.filter(a=>a.playerId===id);if(legal.some(a=>a.type==='PLACE_BURROW')){state=placeRandomBurrow(state,id);revision++;listeners.forEach(fn=>fn());return true;}send(chooseAI(getVisibleState(state,id),id,legal,a=>simulateForAI(state,id,a)));return true;
+   const legal=actions.filter(a=>a.playerId===id);if(legal.some(a=>a.type==='PLACE_BURROW')){state=placeRandomBurrow(state,id);decisions.push({type:'RANDOM_BURROW',playerId:id});revision++;listeners.forEach(fn=>fn());return true;}send(chooseAI(getVisibleState(state,id),id,legal,a=>simulateForAI(state,id,a)));return true;
   },
   expireTurn:(expected:number)=>{
    if(expected!==revision||state.phase!=='PLAYER_ACTION')return;

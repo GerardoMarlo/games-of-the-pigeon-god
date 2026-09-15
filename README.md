@@ -58,3 +58,58 @@ The rules engine is unchanged. See [artwork provenance](docs/reference/ARTWORK.m
 ## Production deployment
 
 See [Cloudflare Pages deployment](docs/DEPLOYMENT.md) for build settings, route fallback and production verification. Build with `npm run build`; publish `dist/`.
+
+## Milestone 8 — tokens, consent and analytics
+
+New Matches default to **one human and two AI opponents**. Match settings still support 2–4 seats and local multiplayer. Health coins flip into Fervor when damaged; additional earned Fervor appears as extra flame-only tokens. Spent tokens dim. These are presentation changes, not new resource rules.
+
+Players can consent to storing their name, any-provider email and gameplay statistics, or play without sharing. The profile can be edited or centrally deleted. Consented telemetry uses a private Cloudflare Worker and D1 through the existing gateway; gameplay continues when uploads fail. See [analytics operations and limitations](docs/MILESTONE-8-OPERATIONS.md).
+
+## Run balance simulations locally
+
+Open a terminal in this repository. Install Node.js 22.12 or newer, then:
+
+```sh
+npm install
+npm run simulate -- --games=1000
+```
+
+No game server or browser is required. The runner uses the existing engine and AI, checks every selected action for legality, and cycles through 2-, 3- and 4-player Matches. Seeds begin at 1 unless specified:
+
+```sh
+npm run simulate -- --games=100 --seed=2001
+npm run simulate -- --games=10000
+```
+
+Results go into a new **`simulation-results/run-<UTC timestamp>/`** directory:
+
+- `balance-simulation.xlsx`: nine readable sheets, including Rat performance and balance findings.
+- `simulation.json`: all Match metrics, seeds, versions and accepted decisions.
+- Separate CSV files for Matches, Rats, Decrees, Items, Cat and Arena metrics.
+- `balance-findings.md`: review signals only; the command never rebalances the game.
+
+Excel generation uses the **Codex bundled `@oai/artifact-tool` runtime**, automatically found in the current user's Codex cache. This is a reporting-only prerequisite, not a production game dependency. If it is installed elsewhere, set `MARLO_REPORT_NODE_MODULES` to that runtime's `node_modules` directory. For the default Windows Codex installation:
+
+```powershell
+$env:MARLO_REPORT_NODE_MODULES = Join-Path $env:USERPROFILE '.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules'
+npm run simulate -- --games=1000
+```
+
+If the Excel runtime is unavailable, the command reports that error after saving raw JSON/CSVs. Once configured, regenerate the workbook without rerunning Matches:
+
+```sh
+node scripts/report.mjs simulation-results/run-<existing timestamp>
+```
+
+Reports are excluded from Git. Preserve the whole run folder for later comparison. Compare matching `rulesVersion`, `aiVersion`, `metricsVersion`, player counts and controller types. The current AI has one strategy; the report does not invent difficulty variants. Rat Match wins describe association with the winning participant, not a causal contribution by one Rat.
+
+Verification commands:
+
+```sh
+npm test
+npm run test:api
+npm run test:telemetry
+npm run build
+```
+
+The first recorded 1,000-Match findings are in [the balance review](docs/BALANCE-2026-09-15.md). One existing Arena-reset bug was fixed before that run; no stats, rewards or AI weights were changed.

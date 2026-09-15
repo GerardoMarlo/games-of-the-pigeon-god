@@ -9,3 +9,15 @@ it('never auto-confirms a human lethal Dodge while existing Fervor can reroll it
 it.each([1,2] as const)('explains the pictured six versus 5,3,4 in Arena %i',arena=>{let s=fixture();s.automatic=false;s.arenaNumber=arena;s.players.p1.currentRat.health=3;startCombat(s,'p1',{q:-2,r:0},{q:-2,r:-1});s.combat!.attackerRoll=[6];s.combat!.attackerConfirmed=true;s.combat!.defenderRoll=[5,3,4];s.combat!.stage='DODGE';s=dispatch(s,{type:'CONFIRM_DODGE',playerId:'p1'});expect(s.players.p1.currentRat.health).toBe(arena===2?2:3);expect(s.eventLog).toContainEqual({type:'COMBAT_MATH',arena,hits:arena===2?2:1,canceled:1,counter:0});});
 
 
+import {finishArena} from './lifecycle';
+it('clears Item Cat movement at Arena transition so the next Rat receives its Actions',()=>{
+ let s=createGame({seed:716,playerCount:3,mode:'ai'});
+ while(s.phase==='ARENA_SETUP')s=dispatch(s,getLegalActions(s,s.activePlayerId)[0]);
+ s.content!.catItemMovement=true;
+ finishArena(s);
+ s=dispatch(s,{type:'CONTINUE_ARENA',playerId:s.activePlayerId});
+ s=dispatch(s,{type:'START_ARENA_2',playerId:s.activePlayerId});
+ expect(s.content!.catItemMovement).toBeUndefined();
+ expect(s.players[s.activePlayerId].actionsRemaining).toBe(2);
+ expect(getLegalActions(s,s.activePlayerId).length).toBeGreaterThan(0);
+});

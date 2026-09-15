@@ -5,10 +5,16 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build": "tsc --noEmit && vite build",
+    "build": "node scripts/version.mjs && tsc --noEmit && vite build",
     "test": "vitest run",
     "test:watch": "vitest",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "simulate": "node scripts/run-simulation.mjs",
+    "test:api": "node --test backend/*.check.mjs",
+    "test:telemetry": "node scripts/verify-telemetry.mjs",
+    "build:api": "node scripts/build-api.mjs",
+    "export:players": "node scripts/export-data.mjs players",
+    "export:analytics": "node scripts/export-data.mjs analytics"
   },
   "dependencies": {
     "react": "^19.1.0",

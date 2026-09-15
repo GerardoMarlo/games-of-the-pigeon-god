@@ -1,3 +1,4 @@
+import { observe } from './observation';
 import { claimDecrees,restockDecrees } from './content/decrees';
 import { resetContentArena } from './content/state';
 import { beginPlacement } from './burrows';
@@ -16,10 +17,10 @@ function compare(a:PlayerState,b:PlayerState):number {
 export function rankLiving(state:GameState):PlayerState[] {
   return Object.values(state.players).filter(p=>p.currentRat.alive).sort(compare);
 }
-export function awardFavor(state:GameState,playerId:string,amount:number):void {
+export function awardFavor(state:GameState,playerId:string,amount:number,source:'arena'|'bet'='arena'):void {
   if(state.finalDuel)return;
   state.players[playerId].divineFavor+=amount;
-  state.eventLog.push({type:'FAVOR_CHANGED',playerId,amount});
+  state.eventLog.push({type:'FAVOR_CHANGED',playerId,amount,source});
 }
 export function finishArena(state:GameState):void {
   if(state.arenaResults.some(r=>r.arenaNumber===state.arenaNumber))return;
@@ -30,13 +31,14 @@ export function finishArena(state:GameState):void {
   for(const p of Object.values(state.players))p.actionsRemaining=0;
   if(winner)awardFavor(state,winner.id,RULES.arenaWinnerFavor);
   claimDecrees(state,'end_of_arena');
-  if(state.content){for(const p of Object.values(state.content.players)){state.content.itemDiscard.push(...p.items);p.items=[];p.brasa=false;}state.content.effects=[];delete state.content.combat;}
-  for(const p of Object.values(state.players))if(winner&&p.betTargetPlayerId===winner.id)awardFavor(state,p.id,1);
+  if(state.content){for(const [playerId,p] of Object.entries(state.content.players)){for(const cardId of p.items)state.eventLog.push({type:'ITEM_DISCARDED',playerId,cardId});state.content.itemDiscard.push(...p.items);p.items=[];p.brasa=false;}state.content.effects=[];delete state.content.combat;}
+  for(const p of Object.values(state.players))if(winner&&p.betTargetPlayerId===winner.id)awardFavor(state,p.id,1,'bet');
   state.arenaResults.push({arenaNumber:state.arenaNumber,winnerId:winner?.id,reason,ranking:ranked.map(p=>p.id),favor:Object.fromEntries(Object.values(state.players).map(p=>[p.id,p.divineFavor]))});
+  observe(state,'segment_end',reason);
   state.eventLog.push({type:'ARENA_ENDED',winnerId:winner?.id});phase(state,'ARENA_END');
 }
 function finishMatch(state:GameState,winnerId:string):void {
-  state.winnerId=winnerId;delete state.combat;
+  state.winnerId=winnerId;if(state.finalDuel)observe(state,'segment_end','duel');delete state.combat;
   for(const p of Object.values(state.players))p.actionsRemaining=0;
   state.eventLog.push({type:'MATCH_ENDED',winnerId});phase(state,'MATCH_END');
 }
@@ -45,7 +47,7 @@ export function checkEliminationEnd(state:GameState):boolean {
   if(living.length>1)return false;
   if(state.finalDuel){
     if(living[0])finishMatch(state,living[0].id);
-    else startDuel(state);
+    else {observe(state,'segment_end','duel_restart');startDuel(state);}
   }else finishArena(state);
   return true;
 }
@@ -71,9 +73,9 @@ function startArenaTwo(state:GameState):void {
     const p=state.players[id],reserved=p.draftedRats.find(r=>r.id!==p.currentRat.ratId)!;
     deploy(state,p,reserved.id,i);
   }
-  state.arenaNumber=2;state.roundNumber=1;restockDecrees(state);delete state.arenaWinnerId;delete state.combat;
+  state.arenaNumber=2;state.roundNumber=1;delete state.arenaWinnerId;delete state.combat;
   carryCatToArena(state);state.cat.alive=true;
-  state.eventLog.push({type:'ARENA_STARTED',arenaNumber:2});phase(state,'ROUND_START');beginTurn(state);
+  state.eventLog.push({type:'ARENA_STARTED',arenaNumber:2});observe(state,'segment_start');restockDecrees(state);phase(state,'ROUND_START');beginTurn(state);
 }
 function startDuel(state:GameState):void {
   resetContentArena(state);
@@ -87,7 +89,7 @@ function startDuel(state:GameState):void {
     else {p.eliminated=true;p.currentRat.alive=false;p.currentRat.health=0;p.actionsRemaining=0;}
   }
   state.roundNumber=1;state.activePlayerId=state.turnOrder[0];delete state.combat;
-  state.eventLog.push({type:'DUEL_STARTED',attempt:duel.attempt});beginPlacement(state);
+  state.eventLog.push({type:'DUEL_STARTED',attempt:duel.attempt});observe(state,'segment_start');beginPlacement(state);
 }
 export function pendingBettor(state:GameState):string|undefined {
  if(state.finalDuel||!['PLAYER_ACTION','CAT_MOVEMENT'].includes(state.phase))return;

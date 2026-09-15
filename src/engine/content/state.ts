@@ -23,5 +23,5 @@ export function bonusAction(state:GameState,id:string,limited:boolean):void {
 export function resetContentArena(state:GameState):void {
  const c=state.content;if(!c)return;
  for(const id of state.seatOrder){c.itemDiscard.push(...c.players[id].items);c.players[id]=cardPlayer();}
- c.effects=[];delete c.combat;delete c.catStep;delete c.catDie;delete c.catRolled;delete c.resume;
+ c.effects=[];delete c.combat;delete c.catStep;delete c.catDie;delete c.catRolled;delete c.catItemMovement;delete c.resume;
 }

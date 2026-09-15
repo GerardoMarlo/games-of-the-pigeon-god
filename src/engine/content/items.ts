@@ -46,14 +46,16 @@ export function applyItem(state:GameState,action:GameAction):void {
  const p=state.players[action.playerId],owned=data.players[p.id];
  if(action.type==='REQUEST_ITEM'){
   p.actionsRemaining--;const item=data.itemDeck.shift()!;owned.items.push(item);owned.afterMovement=false;
+  state.eventLog.push({type:'ACTION_SPENT',playerId:p.id,amount:1,bonus:false},{type:'ITEM_DRAWN',playerId:p.id,cardId:item});
   note(state,`${p.id} requests ${itemCards.find(c=>c.id===item)!.name} (1 Action).`);return;
  }
  if(action.type!=='USE_ITEM')throw new Error('Invalid Item action');
  owned.items.splice(owned.items.indexOf(action.itemId),1);data.itemDiscard.push(action.itemId);
+ state.eventLog.push({type:'ITEM_USED',playerId:p.id,cardId:action.itemId});
  note(state,`${p.id} uses ${itemCards.find(c=>c.id===action.itemId)!.name}.`);
  const c=state.combat,ctx=data.combat;
  switch(action.itemId){
-  case 'chile':p.fervor++;break;
+  case 'chile':p.fervor++;state.eventLog.push({type:'FERVOR_CHANGED',playerId:p.id,amount:1,reason:'Chile'});break;
   case 'brasa':owned.brasa=true;break;
   case 'patines':owned.speedBonus=2;break;
   case 'hueso':owned.afterMovement=false;data.effects.push({playerId:p.id,entityId:p.id,steps:1,reason:'Polished Bone'});if(!c){data.resume='player_action';resumeEffects(state);}break;

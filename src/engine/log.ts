@@ -1,6 +1,7 @@
 import type { GameEvent } from './types';
 export function describeEvent(e:GameEvent):string {
   switch(e.type){
+    case 'OBSERVATION':case 'ITEM_DRAWN':case 'ITEM_USED':case 'ITEM_DISCARDED':case 'DECREE_REVEALED':case 'ACTION_SPENT':return '';
     case 'DECREE_CLAIMED':return `${e.playerId.toUpperCase()} completes ${e.name}: +${e.reward} Divine Favor.`;
     case 'COMBAT_MATH':return `Arena ${e.arena}: ${e.hits} incoming Hits − ${e.canceled} canceled = ${e.hits-e.canceled} incoming damage; ${e.counter} counter damage (damage capped by remaining Health).`;
     case 'CONTENT':return e.message;

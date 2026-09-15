@@ -1,10 +1,11 @@
+import { observe } from './observation';
 import { finishArena } from './lifecycle';
 import { equal } from './hex';
 import { RULES } from './rules';
 import type { GameState, GamePhase } from './types';
 export function phase(state:GameState,value:GamePhase):void {state.phase=value;state.eventLog.push({type:'PHASE_CHANGED',phase:value});}
 export function beginTurn(state:GameState):void {
-  phase(state,'TURN_START');
+  phase(state,'TURN_START');observe(state,'turn_start');
   const player=state.players[state.activePlayerId];
   player.actionsRemaining=0;
   if(state.content){

@@ -16,7 +16,7 @@ export function respawnCat(state:GameState,killed:boolean,resume:'actions'|'end_
   state.cat.alive=true;state.cat.offBoard=true;
   const spawn={...state.cat.spawnPosition},defenderId=occupant(state,spawn);
   state.cat.position=spawn;
-  state.eventLog.push({type:'CAT_RESPAWNED',health:state.cat.health,occupied:!!defenderId});
+  state.eventLog.push({type:'CAT_RESPAWNED',health:state.cat.health,occupied:!!defenderId,reason:killed?'finished':'out_of_bounds'});
   if(defenderId){
     // A spawning Cat is staged off-board until combat establishes its legal position.
     if(!arenaEnded)startCombat(state,defenderId,spawn,spawn,{origin:'cat_respawn',resume,catCreditPlayerId});
